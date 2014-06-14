@@ -1,0 +1,144 @@
+/* necessary hack angular.ui */ 
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+/*
+ * Custom items
+ */
+.hr-centered-text {
+	background-color: #fff; 
+	position: relative; 
+	top: -0.7em;
+}
+
+/* CUSTOMIZE THE TABLE
+-------------------------------------------------- */
+.table-hover tbody tr:hover > td {
+  cursor: pointer
+}
+
+
+/* CUSTOMIZE THE CAROUSEL
+-------------------------------------------------- */
+
+/* Carousel base class */
+.carousel {
+  height: 170px;
+  margin-bottom: 60px;
+  border-color: transparent;
+}
+/* Since positioning the image, we need to help out the caption */
+.carousel-caption {
+	color:#000;
+  z-index: 10;
+  border-color: transparent;
+}
+
+/* Declare heights because of positioning of img element */
+.carousel .item {
+  height: 170px;
+  background-color: transparent;
+  border-color: transparent;
+}
+.carousel-inner > .item > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  height: 200px;
+  border-color: transparent;
+}
+
+.carousel-control {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 15%;
+  font-size: 20px;
+  color: #005;
+  text-align: center;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+/* remove gradient background */
+.carousel-control.left {
+  background-image: none;
+  background-image: none;
+  filter: none;
+  background-repeat: none;
+}
+.carousel-control.right {
+  right: 0;
+  left: auto;
+  background-image: none;
+  background-image: none;
+  filter: none;
+  background-repeat: none;
+}
+.carousel-control:hover,
+.carousel-control:focus {
+  color: #000;
+  text-decoration: none;
+  filter: alpha(opacity=90);
+  outline: none;
+  opacity: .9;
+}
+.carousel-control .icon-prev,
+.carousel-control .icon-next,
+.carousel-control .glyphicon-chevron-left,
+.carousel-control .glyphicon-chevron-right {
+  position: absolute;
+  top: 50%;
+  z-index: 5;
+  display: inline-block;
+}
+.carousel-control .icon-prev,
+.carousel-control .glyphicon-chevron-left {
+  left: 50%;
+}
+.carousel-control .icon-next,
+.carousel-control .glyphicon-chevron-right {
+  right: 50%;
+}
+.carousel-control .icon-prev,
+.carousel-control .icon-next {
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  font-family: serif;
+}
+.carousel-control .icon-prev:before {
+  content: '\2039';
+}
+.carousel-control .icon-next:before {
+  content: '\203a';
+}
+
+.carousel-indicators li {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 1px;
+  text-indent: -999px;
+  cursor: pointer;
+  background-color: #00a \9;
+  background-color: rgba(0, 0, 255, 0);
+  border: 1px solid #000;
+  border-radius: 10px;
+}
+.carousel-indicators .active {
+  width: 12px;
+  height: 12px;
+  margin: 0;
+  background-color: #00a;
+}
+
+/* Custom display */
+.vCenterRow {
+	float:none;
+    display:inline-block;
+    vertical-align:middle;
+}
+
