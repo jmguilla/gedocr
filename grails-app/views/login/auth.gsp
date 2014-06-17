@@ -52,7 +52,7 @@
 						
 						
 						<div class="well text-center" >
-							<facebookAuth:connect/>
+							<googleAuth:connect />
 						</div>
 					</div>
 				</div>
