@@ -89,16 +89,18 @@ class UserController {
               subject: message(code: 'user.create.email.title'))
           result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!')]
         }catch(CannotCreateUserException ccue){
-          result = [alert: 'danger', message: message(code: 'user.create.failure', default: 'Cannot create user {0}', args:[
-              "User errors: " + (ccue.user.errors as String) + '\nUserRole errors: ' + (ccue.userRole.errors as String)
-            ])]
+          result = [
+			  alert: 'danger',
+			  message: message(code: "user.create.failure",
+				  args: ["Cannot create user ${('User errors: ' + ccue.user.errors + '\nUserRole errors: ' + ccue.userRole.errors)}"])
+			  ]
         }
 
       }
       if(request.xhr){
         render(result as JSON)
       }else{
-         render (result as JSON)
+        render(result as JSON)
       }
     }else{
     }
