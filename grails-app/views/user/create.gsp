@@ -14,8 +14,7 @@
 					<div class="col-lg-8 col-lg-offset-2">
 						<g:render template="/shared/alerts" />
 						
-						<div class="well">
-		
+						<div cloak ng-if="!!userCreated == false" class="well">
 							<form class="form-horizontal" id="loginForm" ng-submit="register(user)">
 								<h2>Fill the following information to register</h2>
 								<br/>

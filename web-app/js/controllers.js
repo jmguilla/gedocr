@@ -52,6 +52,7 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		User.register(user, function(data, headers) {
 			// redirect to main page
 			Alert.addAlert(data, -1);
+			$scope.userCreated = true;
 		}, function(httpResponse) {
 			Alert.addAlert(httpResponse.data);
 			$scope.errors = {}
