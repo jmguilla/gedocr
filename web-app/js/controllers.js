@@ -28,6 +28,10 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 	$scope.initUserView = function() {
 		$scope.getUser();
 	}
+	
+	$scope.initUserRegistrationView = function() {
+		$scope.user = {};
+	}
 
 	/**
 	 * Get user and inject in scope
@@ -43,17 +47,8 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		});
 	}
 
-	$scope.register = function(email, password) {
-		if (email == undefined) {
-			email = null;
-		}
-		if (password == undefined) {
-			password = null;
-		}
-		User.register({
-			email : email,
-			pwd : password
-		}, function(data, headers) {
+	$scope.register = function(user) {
+		User.register(user, function(data, headers) {
 			// redirect to main page
 			Alert.addAlert({
 				type : data.alert,

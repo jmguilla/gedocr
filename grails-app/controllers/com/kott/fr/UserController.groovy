@@ -77,7 +77,7 @@ class UserController {
     if(request.post){
       //creating a new user
       String email = request.JSON.email
-      String pwd = request.JSON.pwd
+      String pwd = request.JSON.password
       if(!email || !pwd){
         result = [alert: 'danger', message: message(code: 'user.create.missingparams', default: 'Email and passwords are required.')]
       }else{
