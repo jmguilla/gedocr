@@ -4,8 +4,7 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.Transactional
 
-import com.kott.fr.User;
-import com.kott.fr.user.exceptions.CannotCreateUserException;
+import com.kott.fr.user.exceptions.CannotCreateUserException
 
 
 class UserController {
@@ -73,36 +72,34 @@ class UserController {
 	@Transactional
 	@Secured(['permitAll'])
 	def create(){
-		def result = null
-		if(request.post){
-			//creating a new user
-			String email = request.JSON.email
-			String pwd = request.JSON.password
-			if(!email || !pwd){
-				result = [alert: 'danger', message: message(code: 'user.create.missingparams', default: 'Email and passwords are required.')]
-			}else{
-				try{
-					User newUser = userService.create(email, pwd)
-					emailConfirmationService.sendConfirmation(
-							from: message(code: 'user.create.email.from'),
-							to: newUser.email,
-							subject: message(code: 'user.create.email.title'))
-					result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!')]
-				}catch(CannotCreateUserException ccue){
-					result = [
-						alert: 'danger',
-						message: message(code: "user.create.failure",
-						args: ["Cannot create user ${('User errors: ' + ccue.user.errors + '\nUserRole errors: ' + ccue.userRole.errors)}"])
-					]
+		withFormat{
+			html{
+				//will render create.gsp
+				respond(view: 'create')
+				return
+			}
+			json{
+				def result = null
+				if(request.post){
+					try{
+						User newUser = userService.create(request.JSON)
+						emailConfirmationService.sendConfirmation(
+								from: message(code: 'user.create.email.from'),
+								to: newUser.email,
+								subject: message(code: 'user.create.email.title'))
+						result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!')]
+					}catch(CannotCreateUserException ccue){
+						result = [
+							alert: 'danger',
+							message: message(code: "user.create.failure",
+							args: ["Cannot create user ${('User errors: ' + ccue.user.errors + '\nUserRole errors: ' + ccue.userRole.errors)}"])
+						]
+					}
+				}else{
+					response.status = 405
 				}
-
-			}
-			if(request.xhr){
-				render(result as JSON)
-			}else{
 				render(result as JSON)
 			}
-		}else{
 		}
 	}
 

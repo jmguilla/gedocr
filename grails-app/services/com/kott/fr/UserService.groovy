@@ -3,10 +3,9 @@ package com.kott.fr
 import grails.events.Listener
 import grails.transaction.Transactional
 
+import org.codehaus.groovy.grails.web.json.JSONObject
 import org.springframework.transaction.annotation.Propagation
 
-import com.kott.fr.User;
-import com.kott.fr.UserRole;
 import com.kott.fr.user.exceptions.CannotCreateUserException
 
 @Transactional
@@ -15,8 +14,8 @@ class UserService {
   def messageSource
   
   @Transactional(propagation = Propagation.MANDATORY)
-	def create(String email, String pwd) {
-    User newUser = new User(email: email, password: pwd, enabled: false)
+	def create(Map map) {
+    User newUser = new User(map)
     UserRole newUserRole = new UserRole(user: newUser, role: Role.findByAuthority("ROLE_USER"))
     if(!newUser.save() || !newUserRole.save()){
       throw new CannotCreateUserException("Cannot create user", newUser, newUserRole)

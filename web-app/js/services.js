@@ -1,7 +1,7 @@
 var services = angular.module("services", [ "ngResource" ]);
 
 services.factory('User', function($resource) {
-	return $resource('/user/:actionId/:userId', {
+	return $resource('/user/:actionId/:userId.json', {
 		actionId : '',
 		userId : '@id'
 	}, {
