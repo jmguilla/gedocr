@@ -49,7 +49,7 @@ class BootStrap {
         UserRole.create basicUser, userRole
       }
 
-      def test = new User( email: "test@yahoo.fr", username: "testuser", password:"testpass",
+      def test = User.findByUsername('testuser')?: new User( email: "test@yahoo.fr", username: "testuser", password:"testpass",
       enabled:true, accountExpired:false, accountLocked:false, passwordExpired:false ).save(failOnError: true)
 
     }
