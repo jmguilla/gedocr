@@ -82,6 +82,7 @@ services.factory('Alert', function($rootScope, $timeout) {
 					outParam[value.field] = value;
 				}, outParam);
 			}
+			return outParam;
 		}
 	};
 })

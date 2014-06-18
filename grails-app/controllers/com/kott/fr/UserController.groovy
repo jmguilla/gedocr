@@ -59,11 +59,11 @@ class UserController {
 	def confirmed(){
 		User user = User.findWhere(email: params.email)
 		if(!user){
-			return [uri:'/', args:[alert: 'danger', message: message(code: 'user.confirmation.failure', default: 'No user with such email in our DB: {0}', args: [params.email])]]
+			return [uri:'/', args:[type: 'danger', message: message(code: 'user.confirmation.failure', default: 'No user with such email in our DB: {0}', args: [params.email])]]
 		}else{
 			user.enabled = true
 			user.save(failOnError: true, flush: true)
-			return [uri:'/', args:[alert: 'success', message: message(code: 'user.confirmation.success', default: 'Thanks for having confirmed your email.')]]
+			return [uri:'/', args:[type: 'success', message: message(code: 'user.confirmation.success', default: 'Thanks for having confirmed your email.')]]
 		}
 	}
 
@@ -86,12 +86,12 @@ class UserController {
 									from: message(code: 'user.create.email.from'),
 									to: newUser.email,
 									subject: message(code: 'user.create.email.title'))
-							result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
+							result = [type: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
 						}else{
 							response.status = 406
 							newUser?.getErrors()?.getAllErrors()?.each{command.errors.addError(it)}
 							result = [
-								alert: 'danger',
+								type: 'danger',
 								message: message(code: "user.create.failure"),
 								user: command
 							]
@@ -118,11 +118,11 @@ class UserController {
 			User me = springSecurityService.getCurrentUser()
 			bindData(me, request.JSON, [include: ['username']])
 			me.save(failOnError: true, flush: true)
-			render ( [alert: 'success', message: message(code: 'user.update.success', default: 'Update performed successfully')] as JSON)
+			render ( [type: 'success', message: message(code: 'user.update.success', default: 'Update performed successfully')] as JSON)
 		}catch(Throwable t){
 			//TODO log here!
 			response.status = 400
-			render ( [alert: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot performe the update: {0}')] as JSON)
+			render ( [type: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot performe the update: {0}')] as JSON)
 		}
 	}
 

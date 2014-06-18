@@ -55,7 +55,7 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		}, function(httpResponse) {
 			Alert.addAlert(httpResponse.data);
 			$scope.errors = {}
-			Alert.populateErrors($scope.errors, httpResponse.data.user.errors)
+			$scope.errors = Alert.populateErrors($scope.errors, httpResponse.data.user.errors);
 		});
 	}
 
