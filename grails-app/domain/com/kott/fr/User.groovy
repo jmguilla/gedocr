@@ -2,51 +2,51 @@ package com.kott.fr
 
 class User {
 
-  transient springSecurityService
+	transient springSecurityService
 
-  String email
-  String username
-  String password
-  Date signin
-  boolean enabled
-  boolean accountExpired
-  boolean accountLocked
-  boolean passwordExpired
-  
-  static hasMany = [oAuthIDs: OAuthID]
+	String email
+	String username
+	String password
+	Date signin
+	boolean enabled
+	boolean accountExpired
+	boolean accountLocked
+	boolean passwordExpired
 
-  static transients = ['springSecurityService']
+	static hasMany = [oAuthIDs: OAuthID]
 
-  static constraints = {
-    email nullable: false, blank: false, unique: true, email: true
-    username nullable: true, blank: false
-    password blank: false
-	signin nullable: false, blank: false
-  }
+	static transients = ['springSecurityService']
 
-  static mapping = { password column: '`password`' }
+	static constraints = {
+		email nullable: false, blank: false, unique: true, email: true
+		username nullable: true, blank: false
+		password blank: false
+		signin nullable: false, blank: false
+	}
 
-  Set<Role> getAuthorities() {
-    UserRole.findAllByUser(this).collect { it.role } as Set
-  }
+	static mapping = { password column: '`password`' }
 
-  def beforeInsert() {
-    encodePassword()
-  }
+	Set<Role> getAuthorities() {
+		UserRole.findAllByUser(this).collect { it.role } as Set
+	}
 
-  def beforeUpdate() {
-    if (isDirty('password')) {
-      encodePassword()
-    }
-  }
-  
-  def beforeValidate() {
-	  if(!signin){
-		  signin = new Date()
-	  }
-  }
+	def beforeInsert() {
+		encodePassword()
+	}
 
-  protected void encodePassword() {
-    password = springSecurityService.encodePassword(password)
-  }
+	def beforeUpdate() {
+		if (isDirty('password')) {
+			encodePassword()
+		}
+	}
+
+	def beforeValidate() {
+		if(!signin){
+			signin = new Date()
+		}
+	}
+
+	protected void encodePassword() {
+		password = springSecurityService.encodePassword(password)
+	}
 }

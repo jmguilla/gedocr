@@ -25,18 +25,15 @@ import com.kott.fr.User
  */
 class OAuthID implements Serializable {
 
-    String provider
-    String accessToken
+	String provider
+	String accessToken
 
-    static belongsTo = [user: User]
+	static belongsTo = [user: User]
 
-    static constraints = {
-        accessToken unique: true
-    }
+	static constraints = { accessToken unique: true }
 
-    static mapping = {
-        provider    index: "identity_idx"
-        accessToken index: "identity_idx"
-    }
-
+	static mapping = {
+		provider    index: "identity_idx"
+		accessToken index: "identity_idx"
+	}
 }

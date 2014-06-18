@@ -15,7 +15,7 @@ class UserService {
   def messageSource
   
   @Transactional(propagation = Propagation.MANDATORY)
-  def create(String email, String pwd) {
+	def create(String email, String pwd) {
     User newUser = new User(email: email, password: pwd, enabled: false)
     UserRole newUserRole = new UserRole(user: newUser, role: Role.findByAuthority("ROLE_USER"))
     if(!newUser.save() || !newUserRole.save()){
