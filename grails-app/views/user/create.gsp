@@ -3,7 +3,7 @@
 	<head>
 	<meta name='layout' content='main' />
 	
-	<title><g:message code="fr - Register" /></title>
+	<title><g:message code="gedocr - Register" /></title>
 	
 	<r:require module="application" />
 	
@@ -22,7 +22,7 @@
 		
 							<form class="form-horizontal" id="loginForm"
 								 ng-submit="register(email,password)">
-								<h2>Fill the following informations to register</h2>
+								<h2>Fill the following information to register</h2>
 								<br/>
 								<fieldset>
 									<div class="form-group">
