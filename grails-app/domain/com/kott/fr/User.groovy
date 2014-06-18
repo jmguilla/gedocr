@@ -1,10 +1,16 @@
 package com.kott.fr
 
+import grails.plugins.jsonapis.JsonApi
+
+import org.springframework.validation.Errors
+
 class User {
 
 	transient springSecurityService
 
+	@JsonApi("userUpdate")
 	String email
+	@JsonApi("userUpdate")
 	String username
 	String password
 	Date signin
@@ -12,6 +18,16 @@ class User {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	
+	static marshalling={
+		json{
+		  userUpdate{
+			shouldOutputIdentifier false
+			shouldOutputVersion false
+			shouldOutputClass false
+		  }
+		}
+	  }
 
 	static hasMany = [oAuthIDs: OAuthID]
 
@@ -19,8 +35,8 @@ class User {
 
 	static constraints = {
 		email nullable: false, blank: false, unique: true, email: true
-		username nullable: true, blank: false
-		password blank: false
+		username nullable: false, blank: false
+		password nullable: false, blank: false
 		signin nullable: false, blank: false
 	}
 

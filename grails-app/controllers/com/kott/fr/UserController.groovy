@@ -4,8 +4,6 @@ import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.Transactional
 
-import com.kott.fr.user.exceptions.CannotCreateUserException
-
 
 class UserController {
 
@@ -71,7 +69,7 @@ class UserController {
 
 	@Transactional
 	@Secured(['permitAll'])
-	def create(){
+	def create(UserRegistrationCommand command){
 		withFormat{
 			html{
 				//will render create.gsp
@@ -79,27 +77,30 @@ class UserController {
 				return
 			}
 			json{
-				def result = null
-				if(request.post){
-					User newUser = userService.create(request.JSON)
-					if(newUser.hasErrors()){
-						response.status = 406
-						result = [
-							alert: 'danger',
-							message: message(code: "user.create.failure"),
-							user: newUser
-						]
+				JSON.use("userUpdate"){
+					def result = null
+					if(request.post){
+						User newUser = null
+						if(command.validate() && !(newUser = userService.create(command.properties))?.hasErrors()){
+							emailConfirmationService.sendConfirmation(
+									from: message(code: 'user.create.email.from'),
+									to: newUser.email,
+									subject: message(code: 'user.create.email.title'))
+							result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
+						}else{
+							response.status = 406
+							newUser?.getErrors()?.getAllErrors()?.each{command.errors.addError(it)}
+							result = [
+								alert: 'danger',
+								message: message(code: "user.create.failure"),
+								user: command
+							]
+						}
 					}else{
-						emailConfirmationService.sendConfirmation(
-								from: message(code: 'user.create.email.from'),
-								to: newUser.email,
-								subject: message(code: 'user.create.email.title'))
-						result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
+						response.status = 405
 					}
-				}else{
-					response.status = 405
+					render(result as JSON)
 				}
-				render(result as JSON)
 			}
 		}
 	}
@@ -164,5 +165,20 @@ class UserController {
 			response.status = 400
 			render ( [alert: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot perform the update: {0}')] as JSON)
 		}
+	}
+}
+
+@grails.validation.Validateable
+class UserRegistrationCommand {
+	String username
+	String email
+	String emailConfirmation
+	String password
+	String passwordConfirmation
+
+	static constraints = {
+		importFrom User, include: ["username", "email", "password"]
+		emailConfirmation blank: false, validator: { val, UserRegistrationCommand obj -> obj.email.equals(val)}
+		passwordConfirmation blank: false, validator: { val, UserRegistrationCommand obj -> obj.password.equals(val)}
 	}
 }

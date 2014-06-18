@@ -69,6 +69,7 @@ grails.project.dependency.resolution = {
     compile ":spring-security-facebook:0.15.2-CORE2"
 	compile ":spring-security-oauth:2.0.2"
     compile ":spring-security-oauth-google:0.2"
+	compile ":json-apis:0.9"
     // plugins needed at runtime but not for compilation
     runtime ":hibernate:3.6.10.2" // or ":hibernate4:4.1.11.2"
     runtime ":database-migration:1.3.5"
