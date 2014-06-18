@@ -140,12 +140,12 @@ class UserController {
 		def newPWDAgain = request.JSON.newPWDAgain
 		if(!current || !newPWD || !newPWDAgain){
 			response.status = 400
-			render([alert: 'danger', message: message(code: 'user.pwd.update.paramsrequired')] as JSON)
+			render([type: 'danger', message: message(code: 'user.pwd.update.paramsrequired')] as JSON)
 			return
 		}
 		if(!newPWD.equals(newPWDAgain)){
 			response.status = 400
-			render([alert: 'danger', message: message(code: 'user.pwd.update.wrongconfirmation')] as JSON)
+			render([type: 'danger', message: message(code: 'user.pwd.update.wrongconfirmation')] as JSON)
 			return
 		}
 		def user = springSecurityService.getCurrentUser()
@@ -153,17 +153,17 @@ class UserController {
 		def salt = saltSource.getSalt(userDetails)
 		if(!springSecurityService.passwordEncoder.isPasswordValid(userDetails.password, current, salt)){
 			response.status = 400
-			render([alert: 'danger', message: message(code: 'user.pwd.update.missmatch')] as JSON)
+			render([type: 'danger', message: message(code: 'user.pwd.update.missmatch')] as JSON)
 			return
 		}
 		user.password = newPWD
 		try{
 			user.save(failOnError: true)
-			render([alert: 'success', message: message(code: 'user.pwd.update.success')] as JSON)
+			render([type: 'success', message: message(code: 'user.pwd.update.success')] as JSON)
 		}catch(Throwable t){
 			//TODO log here!
 			response.status = 400
-			render ( [alert: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot perform the update: {0}')] as JSON)
+			render ([type: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot perform the update: {0}')] as JSON)
 		}
 	}
 }

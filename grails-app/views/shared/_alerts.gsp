@@ -4,8 +4,7 @@
 	<!-- flash -->
 	<g:if test='${flash.message}'>
 		<div class="alert alert-danger fade in">
-			<button type="button" class="close" data-dismiss="alert"
-				aria-hidden="true">&times;</button>
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 			<div class="textNoShadow">
 				<span> ${flash.message}
 				</span>
@@ -18,6 +17,6 @@
 		class="alert alert-{{alert.type}} alert-dismissable slide" ng-cloak>
 		<button ng-click="alerts.splice($index, 1)" type="button"
 			class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-		<span ng-bind="alert.content"></span>
+		<span ng-bind="alert.message"></span>
 	</div>
 </div>

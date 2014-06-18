@@ -20,8 +20,7 @@
 						
 						<div class="well">
 		
-							<form class="form-horizontal" id="loginForm"
-								 ng-submit="register(user)">
+							<form class="form-horizontal" id="loginForm" ng-submit="register(user)">
 								<h2>Fill the following information to register</h2>
 								<br/>
 								<fieldset>
@@ -32,33 +31,29 @@
 													ng-model="user.username">
 										</div>
 									</div>
-									<div class="form-group">
+									<div class="form-group" ng-class="{true: 'has-error', false: ''}[errors['email'] != undefined]">
 										<label for="email" class="col-lg-2 control-label">Email</label>
 										<div class="col-lg-10">
-											<input id='email' type="text" class="form-control"
-													ng-model="user.email">
+											<input id='email' type="text" class="form-control" ng-model="user.email">
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="confirmation-email" class="col-lg-2 control-label"></label>
 										<div class="col-lg-10">
-											<input id='confirmation-email' type="text"
-													placeholder="Confirm Email..." class="form-control"
+											<input id='confirmation-email' type="text" placeholder="Confirm Email..." class="form-control"
 													ng-model="user.emailConfirmation">
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="password" class="col-lg-2 control-label">Password</label>
 										<div class="col-lg-10">
-											<input id='password' type="password" class="form-control"
-													ng-model="user.password">
+											<input id='password' type="password" class="form-control" ng-model="user.password">
 										</div>
 									</div>
 									<div class="form-group">
 										<label for="confirmation-password" class="col-lg-2 control-label"></label>
 										<div class="col-lg-10">
-											<input id='confirmation-password' type="password"
-													placeholder="Confirm password..." class="form-control"
+											<input id='confirmation-password' type="password" placeholder="Confirm password..." class="form-control"
 													ng-model="user.passwordConfirmation">
 										</div>
 									</div>

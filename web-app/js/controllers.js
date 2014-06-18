@@ -31,6 +31,7 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 	
 	$scope.initUserRegistrationView = function() {
 		$scope.user = {};
+		$scope.errors = {};
 	}
 
 	/**
@@ -50,15 +51,11 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 	$scope.register = function(user) {
 		User.register(user, function(data, headers) {
 			// redirect to main page
-			Alert.addAlert({
-				type : data.alert,
-				content : data.message
-			}, -1);
+			Alert.addAlert(data, -1);
 		}, function(httpResponse) {
-			Alert.addAlert({
-				type : httpResponse.data.alert,
-				content : httpResponse.data.message
-			});
+			Alert.addAlert(httpResponse.data);
+			$scope.errors = {}
+			Alert.populateErrors($scope.errors, httpResponse.data.user.errors)
 		});
 	}
 

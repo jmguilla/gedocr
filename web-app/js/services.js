@@ -59,9 +59,6 @@ services.factory('Alert', function($rootScope, $timeout) {
 				alert.content = "An error occured."
 			}
 
-			if (!timeout) {
-				timeout = 3000;
-			}
 			$rootScope.alerts.push(alert);
 
 			if (timeout > 0) {
@@ -77,6 +74,14 @@ services.factory('Alert', function($rootScope, $timeout) {
 
 		clear : function() {
 			$rootScope.alerts = [];
+		},
+		
+		populateErrors: function(outParam, errors){
+			if(errors && errors.errors){
+				angular.forEach(errors.errors, function(value, key){
+					outParam[value.field] = value;
+				}, outParam);
+			}
 		}
 	};
 })
