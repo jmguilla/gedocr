@@ -81,19 +81,20 @@ class UserController {
 			json{
 				def result = null
 				if(request.post){
-					try{
-						User newUser = userService.create(request.JSON)
+					User newUser = userService.create(request.JSON)
+					if(newUser.hasErrors()){
+						response.status = 406
+						result = [
+							alert: 'danger',
+							message: message(code: "user.create.failure"),
+							user: newUser
+						]
+					}else{
 						emailConfirmationService.sendConfirmation(
 								from: message(code: 'user.create.email.from'),
 								to: newUser.email,
 								subject: message(code: 'user.create.email.title'))
-						result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!')]
-					}catch(CannotCreateUserException ccue){
-						result = [
-							alert: 'danger',
-							message: message(code: "user.create.failure",
-							args: ["Cannot create user ${('User errors: ' + ccue.user.errors + '\nUserRole errors: ' + ccue.userRole.errors)}"])
-						]
+						result = [alert: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
 					}
 				}else{
 					response.status = 405

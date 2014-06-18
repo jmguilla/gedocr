@@ -17,9 +17,7 @@ class UserService {
 	def create(Map map) {
     User newUser = new User(map)
     UserRole newUserRole = new UserRole(user: newUser, role: Role.findByAuthority("ROLE_USER"))
-    if(!newUser.save() || !newUserRole.save()){
-      throw new CannotCreateUserException("Cannot create user", newUser, newUserRole)
-    }
+    newUser.save() && newUserRole.save()
     return newUser
   }
   
