@@ -15,21 +15,18 @@
  */
 package com.kott.fr
 
-import javax.annotation.security.PermitAll;
-
+import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.oauth.OAuthToken
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService
 import grails.plugin.springsecurity.userdetails.GrailsUser
-import grails.plugin.springsecurity.SpringSecurityUtils
 
+import javax.annotation.security.PermitAll
+
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.web.savedrequest.DefaultSavedRequest
-
-import com.kott.fr.User
-import com.kott.fr.Role
-import com.kott.fr.UserRole
-import com.kott.fr.OAuthID
 
 /**
  * Simple helper controller for handling OAuth authentication and integrating it
@@ -42,6 +39,7 @@ class OauthController {
     def grailsApplication
     def oauthService
     def springSecurityService
+	def authenticationManager
 
     /**
      * This can be used as a callback for a successful OAuth authentication
@@ -116,9 +114,16 @@ class OauthController {
 
         if (request.post) {
             boolean linked = command.validate() && User.withTransaction { status ->
-                User user = User.findByEmailAndPassword(
-                        command.email, springSecurityService.encodePassword(command.password))
-                if (user) {
+				UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(command.email, command.password);
+				Authentication auth = null
+				User user = null
+				try{
+					auth = authenticationManager.authenticate(token)
+					user = User.findByEmail(command.email)
+				}catch(BadCredentialsException bce){
+					//miam miam -> wrong auth
+				}
+				if(user && auth?.isAuthenticated()){
                     user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
                     if (user.validate() && user.save()) {
                         oAuthToken = updateOAuthToken(oAuthToken, user)

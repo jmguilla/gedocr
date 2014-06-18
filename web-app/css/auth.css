@@ -1,0 +1,8 @@
+#google-connect-link {
+	margin-left: auto;
+	margin-right: auto;
+	background-image: url('/images/skin/sign_in_with_google.png');
+	width: 250px;
+	height: 60px;
+	padding: 0;
+}
