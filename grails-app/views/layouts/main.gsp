@@ -8,23 +8,17 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
 		<g:render template="/shared/headConfig" />
-		
 		<g:render template="/shared/analytics" />
-
 		<title>
-			<g:layoutTitle default="fr"/>
+			<g:layoutTitle default="gedocr"/>
 		</title>
-		
-		
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<g:layoutHead/>
 		<r:layoutResources />
 	</head>
 	
-	<body ng-app="frApp"
-			ng-controller="MainCtrl">
+	<body ng-app="frApp" ng-controller="MainCtrl">
 	
 		<!-- facebook share button -->
 		<div id="fb-root"></div>

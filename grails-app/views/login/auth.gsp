@@ -7,6 +7,7 @@
 	
 	<r:require module="application" />
 	
+	<link rel="stylesheet" href="${resource(dir: 'css', file: 'auth.css')}">
 	</head>
 
 	<body>
@@ -49,10 +50,9 @@
 								</fieldset>
 							</form>
 						</div>
-						
-						
+						<hr />
 						<div class="well text-center" >
-							<googleAuth:connect />
+							<oauth:connect provider="google"><p id="google-connect-link"></p></oauth:connect>
 						</div>
 					</div>
 				</div>
