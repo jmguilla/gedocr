@@ -31,6 +31,7 @@
 		}(document, 'script', 'facebook-jssdk'));</script>
 		
 		<g:render template="/shared/nav" />
+		<g:render template="/shared/alerts" />
 		
 		<g:layoutBody/>
 		
