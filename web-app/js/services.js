@@ -47,6 +47,17 @@ services.factory('User', function($resource) {
 				'Content-Type' : 'application/json',
 				'Accept' : 'application/json'
 			}
+		},
+		
+		update: {
+			method: 'POST',
+			params: {
+				actionId: 'update'
+			},
+			headers : {
+				'Content-Type' : 'application/json',
+				'Accept' : 'application/json'
+			}
 		}
 	});
 })

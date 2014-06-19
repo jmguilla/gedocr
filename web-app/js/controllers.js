@@ -101,4 +101,18 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 			Alert.addAlert(httpResponse.data);
 		});
 	}
+
+
+	$scope.update = function() {
+		User.update($scope.user, function(data, headers) {
+			// reset fields
+			$scope.user = data.user;
+			Alert.addAlert(data);
+		}, function(httpResponse) {
+			$scope.user.errors = {}
+			$scope.user.errors = Alert
+					.populateErrors(httpResponse.data.command.errors);
+			Alert.addAlert(httpResponse.data);
+		});
+	}
 });

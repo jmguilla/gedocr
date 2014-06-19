@@ -60,7 +60,9 @@ class UserController {
 		}
 
 		result.user = user
-		JSON.use('getUser'){ render(result as JSON) }
+		JSON.use('getUser'){
+			render(result as JSON)
+		}
 	}
 
 	@Transactional
@@ -93,7 +95,8 @@ class UserController {
 				def result = [:]
 
 				if (request.post) {
-					boolean linked = command.validate() && User.withTransaction { status ->
+					boolean linked = command.validate() && User.withTransaction {
+						status ->
 						UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(command.email, command.password);
 						Authentication auth = null
 						User user = null
@@ -165,9 +168,9 @@ class UserController {
 							}else{
 								// we only need confirmation for enabling the account if no oauth
 								emailConfirmationService.sendConfirmation(
-										from: message(code: 'user.create.email.from'),
-										to: newUser.email,
-										subject: message(code: 'user.create.email.title'))
+								from: message(code: 'user.create.email.from'),
+								to: newUser.email,
+								subject: message(code: 'user.create.email.title'))
 							}
 							result = [type: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
 						}else{
@@ -197,15 +200,11 @@ class UserController {
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	@Transactional
 	def update(){
-		try{
-			User me = springSecurityService.getCurrentUser()
-			bindData(me, request.JSON, [include: ['username']])
-			me.save(failOnError: true, flush: true)
-			render ( [type: 'success', message: message(code: 'user.update.success', default: 'Update performed successfully')] as JSON)
-		}catch(Throwable t){
-			//TODO log here!
-			response.status = 400
-			render ( [type: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot performe the update: {0}')] as JSON)
+		User me = springSecurityService.getCurrentUser()
+		bindData(me, request.JSON, [include: ['username']])
+		me.save(failOnError: true, flush: true)
+		JSON.use('userUpdate'){
+			render ( [type: 'success', message: message(code: 'user.update.success', default: 'Update performed successfully'), user: me] as JSON)
 		}
 	}
 
@@ -227,7 +226,7 @@ class UserController {
 			}
 			return
 		}
-		
+
 		def user = springSecurityService.getCurrentUser()
 		user.password = command.newPassword
 		user.save(failOnError: true)
