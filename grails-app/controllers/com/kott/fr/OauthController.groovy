@@ -63,11 +63,8 @@ class OauthController {
 			return
 		}
 
-		// Do we already have the user in database?
-		def scribeToken = session[sessionKey]
-		
 		// Create the relevant authentication token and attempt to log in.
-		OAuthToken oAuthToken = createAuthToken(params.provider, scribeToken)
+		OAuthToken oAuthToken = createAuthToken(params.provider, session[sessionKey])
 
 		if (oAuthToken.principal instanceof GrailsUser) {
 			authenticateAndRedirect(oAuthToken, defaultTargetUrl)
@@ -105,45 +102,6 @@ class OauthController {
 		}
 	}
 
-	def createAccount(OAuthCreateAccountCommand command){
-		OAuthToken oAuthToken = session[SPRING_SECURITY_OAUTH_TOKEN]
-		assert oAuthToken, "There is no auth token in the session!"
-
-		if (request.post) {
-			if (!springSecurityService.loggedIn) {
-				def config = SpringSecurityUtils.securityConfig
-
-				boolean created = command.validate() && User.withTransaction { status ->
-					User user = new User(email: command.email, password: command.password1, enabled: true)
-					user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
-
-					// updateUser(user, oAuthToken)
-
-					if (!user.validate() || !user.save()) {
-						status.setRollbackOnly()
-						return false
-					}
-
-					for (roleName in config.oauth.registration.roleNames) {
-						UserRole.create user, Role.findByAuthority(roleName)
-					}
-
-					oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
-					return true
-				}
-
-				if (created) {
-					authenticateAndRedirect(oAuthToken, defaultTargetUrl)
-					return
-				}
-			}
-		}
-
-		render view: 'askToLinkOrCreateAccount', model: [createAccountCommand: command]
-	}
-
-	// utils
-
 	protected renderError(code, msg) {
 		log.error msg + " (returning ${code})"
 		render status: code, text: msg
@@ -163,94 +121,6 @@ class OauthController {
 
 		return oAuthToken
 	}
-
-	/*
-	 private def updateUser(User user, OAuthToken oAuthToken) {
-	 if (!user.validate()) {
-	 return
-	 }
-	 if (oAuthToken instanceof TwitterOAuthToken) {
-	 TwitterOAuthToken twitterOAuthToken = (TwitterOAuthToken) oAuthToken
-	 if (!user.username) {
-	 user.username = twitterOAuthToken.twitterProfile.screenName
-	 if (!user.validate()) {
-	 user.username = null
-	 }
-	 }
-	 if (!user.firstName || !user.lastName) {
-	 def names = twitterOAuthToken.twitterProfile.name?.split(' ')
-	 if (names) {
-	 if (!user.lastName) {
-	 user.lastName = names[0]
-	 if (!user.validate()) {
-	 user.lastName = null
-	 }
-	 }
-	 if (!user.firstName) {
-	 user.firstName = names[-1]
-	 if (!user.validate()) {
-	 user.firstName = null
-	 }
-	 }
-	 }
-	 }
-	 } else if (oAuthToken instanceof FacebookOAuthToken) {
-	 FacebookOAuthToken facebookOAuthToken = (FacebookOAuthToken) oAuthToken
-	 if (!user.username) {
-	 user.username = facebookOAuthToken.facebookProfile.username
-	 if (!user.validate()) {
-	 user.username = null
-	 }
-	 }
-	 if (!user.email) {
-	 user.email = facebookOAuthToken.facebookProfile.email
-	 if (!user.validate()) {
-	 user.email = null
-	 }
-	 }
-	 if (!user.lastName) {
-	 user.lastName = facebookOAuthToken.facebookProfile.lastName
-	 if (!user.validate()) {
-	 user.lastName = null
-	 }
-	 }
-	 if (!user.firstName) {
-	 user.firstName = facebookOAuthToken.facebookProfile.firstName
-	 if (!user.validate()) {
-	 user.firstName = null
-	 }
-	 }
-	 } else if (oAuthToken instanceof GoogleOAuthToken) {
-	 GoogleOAuthToken googleOAuthToken = (GoogleOAuthToken) oAuthToken
-	 if (!user.email) {
-	 user.email = googleOAuthToken.email
-	 if (!user.validate()) {
-	 user.email = null
-	 }
-	 }
-	 } else if (oAuthToken instanceof YahooOAuthToken) {
-	 YahooOAuthToken yahooOAuthToken = (YahooOAuthToken) oAuthToken
-	 if (!user.username) {
-	 user.username = yahooOAuthToken.profile.nickname
-	 if (!user.validate()) {
-	 user.username = null
-	 }
-	 }
-	 if (!user.lastName) {
-	 user.lastName = yahooOAuthToken.profile.familyName
-	 if (!user.validate()) {
-	 user.lastName = null
-	 }
-	 }
-	 if (!user.firstName) {
-	 user.firstName = yahooOAuthToken.profile.givenName
-	 if (!user.validate()) {
-	 user.firstName = null
-	 }
-	 }
-	 }
-	 }
-	 */
 
 	protected Map getDefaultTargetUrl() {
 		def config = SpringSecurityUtils.securityConfig

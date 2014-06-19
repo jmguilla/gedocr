@@ -24,8 +24,8 @@ controllers.controller("MainCtrl",
 
 		});
 
-controllers.controller("NavCtrl", function($scope, $window){
-	$scope.upload = function(uploadPath){
+controllers.controller("NavCtrl", function($scope, $window) {
+	$scope.upload = function(uploadPath) {
 		$window.location.href = uploadPath;
 	}
 });
@@ -44,8 +44,8 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		$scope.user = {};
 		$scope.user.errors = {};
 	}
-	
-	$scope.initAccountLinkView = function(){
+
+	$scope.initAccountLinkView = function() {
 		$scope.initUserRegistrationView();
 		$scope.command = {};
 		$scope.command.errors = {};
@@ -89,58 +89,16 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		});
 	}
 
-	$scope.updatePWD = function(current, newPWD, newPWDAgain) {
-		User.updatePWD({
-			current : current,
-			newPWD : newPWD,
-			newPWDAgain : newPWDAgain
-		}, function(data, headers) {
+	$scope.updatePWD = function() {
+		User.updatePWD($scope.command, function(data, headers) {
 			// reset fields
-			$scope.currentPWD = "";
-			$scope.newPWD = "";
-			$scope.newPWDAgain = "";
-
-			if ($scope.modalPWD != null) {
-				$scope.modalPWD.close("ok");
-			}
-
-			Alert.addAlert({
-				type : data.alert,
-				content : data.message
-			});
+			$scope.command = {};
+			Alert.addAlert(data);
 		}, function(httpResponse) {
-			Alert.addAlert({
-				type : httpResponse.data.alert,
-				content : httpResponse.data.message
-			});
+			$scope.command.errors = {}
+			$scope.command.errors = Alert
+					.populateErrors(httpResponse.data.command.errors);
+			Alert.addAlert(httpResponse.data);
 		});
 	}
-
-	$scope.openPWDModal = function() {
-
-		Alert.overrideDisplay(false);
-
-		var ModalInstanceCtrl = function($scope, $modalInstance) {
-
-			$scope.ok = function(currentPWD, newPWD, newPWDAgain) {
-				$scope.updatePWD(currentPWD, newPWD, newPWDAgain)
-			};
-
-			$scope.cancel = function() {
-				$modalInstance.dismiss(false);
-			};
-		};
-
-		$scope.modalPWD = $modal.open({
-			templateUrl : '/partials/user/modal_PWDChange.html',
-			controller : ModalInstanceCtrl,
-			scope : $scope
-		});
-
-		$scope.modalPWD.result.then(function() {
-			Alert.overrideDisplay(true);
-		}, function() {
-			Alert.overrideDisplay(true);
-		});
-	};
 });

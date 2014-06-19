@@ -46,7 +46,6 @@
 		</div>
 	</div>
 
-
 	<script type='text/javascript'>
 	    $(function () {
 	      $("[rel='popover']").popover();

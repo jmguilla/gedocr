@@ -3,6 +3,7 @@ package com.kott.fr
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.oauth.OAuthToken
+import grails.plugins.jsonapis.JsonApi
 import grails.transaction.Transactional
 
 import org.springframework.security.authentication.BadCredentialsException
@@ -59,9 +60,7 @@ class UserController {
 		}
 
 		result.user = user
-		JSON.use('getUser'){
-			render(result as JSON)
-		}
+		JSON.use('getUser'){ render(result as JSON) }
 	}
 
 	@Transactional
@@ -218,37 +217,21 @@ class UserController {
 	 */
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	@Transactional
-	def updatePWD(){
-		def current = request.JSON.current
-		def newPWD = request.JSON.newPWD
-		def newPWDAgain = request.JSON.newPWDAgain
-		if(!current || !newPWD || !newPWDAgain){
-			response.status = 400
-			render([type: 'danger', message: message(code: 'user.pwd.update.paramsrequired')] as JSON)
+	def updatePWD(UpdatePWDCommand command){
+		if(!command.validate()){
+			response.status = 406
+			JSON.use('userUpdate'){
+				command.springSecurityService = null
+				command.saltSource = null
+				render([type: 'danger', message: message(code: 'user.pwd.update.failure', default: 'Cannot update your password'), command: command] as JSON)
+			}
 			return
 		}
-		if(!newPWD.equals(newPWDAgain)){
-			response.status = 400
-			render([type: 'danger', message: message(code: 'user.pwd.update.wrongconfirmation')] as JSON)
-			return
-		}
+		
 		def user = springSecurityService.getCurrentUser()
-		def userDetails = springSecurityService.userDetailsService.loadUserByUsername(user.email)
-		def salt = saltSource.getSalt(userDetails)
-		if(!springSecurityService.passwordEncoder.isPasswordValid(userDetails.password, current, salt)){
-			response.status = 400
-			render([type: 'danger', message: message(code: 'user.pwd.update.missmatch')] as JSON)
-			return
-		}
-		user.password = newPWD
-		try{
-			user.save(failOnError: true)
-			render([type: 'success', message: message(code: 'user.pwd.update.success')] as JSON)
-		}catch(Throwable t){
-			//TODO log here!
-			response.status = 400
-			render ([type: 'danger', message: message(code: 'user.update.failure', args: [t.toString()], default: 'Cannot perform the update: {0}')] as JSON)
-		}
+		user.password = command.newPassword
+		user.save(failOnError: true)
+		render([type: 'success', message: message(code: 'user.pwd.update.success')] as JSON)
 	}
 }
 
@@ -274,5 +257,46 @@ class OAuthLinkAccountCommand {
 
 	static constraints = {
 		importFrom User, include: ["email", "password"]
+	}
+}
+
+@grails.validation.Validateable
+class UpdatePWDCommand {
+	transient def springSecurityService
+	transient def saltSource
+	@JsonApi("userUpdate")
+	String password
+	@JsonApi("userUpdate")
+	String newPassword
+	@JsonApi("userUpdate")
+	String newPasswordConfirmation
+
+	static marshalling={
+		json{
+			userUpdate{
+				shouldOutputIdentifier false
+				shouldOutputVersion false
+				shouldOutputClass false
+			}
+		}
+	}
+
+	static transients = ['springSecurityService']
+
+	static constraints = {
+		password blank: false, validator: {val, UpdatePWDCommand obj ->
+			def user = obj.springSecurityService.getCurrentUser()
+			def userDetails = obj.springSecurityService.userDetailsService.loadUserByUsername(user.email)
+			def salt = obj.saltSource.getSalt(userDetails)
+			if(!obj.springSecurityService.passwordEncoder.isPasswordValid(userDetails.password, obj.password, salt)){
+				return ['updatepwdcommand.password.invalid']
+			}
+		}
+		newPassword blank: false
+		newPasswordConfirmation blank: false, validator: {val, UpdatePWDCommand obj ->
+			if(!val.equals(obj.newPassword)){
+				return ['updatepwdcommand.newpasswordconfirmation.invalid']
+			}
+		}
 	}
 }
