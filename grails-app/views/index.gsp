@@ -2,18 +2,14 @@
 <html>
 	<head>
 	<meta name="layout" content="main" />
-	
-	<title>fr</title>
-	
+	<title>{{WebSite.title()}}</title>
 	<r:require module="application" />
 	
 	</head>
 <body>
 
 	<div class="container">
-
 		<g:render template="/shared/alerts" />
-
 		<sec:ifNotLoggedIn>
 			<div id="notLoggedInOptions">
 				<div class="well text-center">

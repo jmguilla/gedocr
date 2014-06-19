@@ -1,5 +1,5 @@
 // Main controller
-var frApp = angular.module("frApp", [ "ngRoute", "controllers", "services",
+var frApp = angular.module("app", [ "ngRoute", "controllers", "services",
 		"filters", "directives", "ui.bootstrap" ]);
 
 /**
@@ -24,8 +24,7 @@ angular.module('ui.bootstrap.carousel', [ 'ui.bootstrap.transition' ])
  * no use for the moment app.config(["$routeProvider", function($routeProvider){
  * 
  * $routeProvider. when('/', {templateUrl: 'partials/main.html', controller:
- * 'MainCtrl'}). otherwise({redirectTo: '/'});
- *  }
+ * 'MainCtrl'}). otherwise({redirectTo: '/'}); }
  * 
  * ]);
  */

@@ -2,6 +2,7 @@ package com.kott.fr
 
 import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
+import grails.plugin.springsecurity.oauth.OAuthToken
 import grails.transaction.Transactional
 
 
@@ -13,8 +14,7 @@ class UserController {
 	def userService
 	def springSecurityService
 	def saltSource
-
-
+	def myOAuthService
 
 	/**
 	 * Display view of user parameters
@@ -38,6 +38,7 @@ class UserController {
 
 	/**
 	 * Return current user as JSON object
+	 * TODO Check that method
 	 * @return
 	 */
 	def getUser() {
@@ -82,10 +83,22 @@ class UserController {
 					if(request.post){
 						User newUser = null
 						if(command.validate() && !(newUser = userService.create(command.properties))?.hasErrors()){
-							emailConfirmationService.sendConfirmation(
-									from: message(code: 'user.create.email.from'),
-									to: newUser.email,
-									subject: message(code: 'user.create.email.title'))
+							// treating the case when the user creation is done after oauth authentication
+							OAuthToken oAuthToken = session[OauthController.SPRING_SECURITY_OAUTH_TOKEN]
+							if(oAuthToken){
+								newUser.enabled = true
+								newUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: newUser)
+								if (newUser.validate() && newUser.save()) {
+									oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, newUser)
+								}
+								// no authenticating
+							}else{
+								// we only need confirmation for enabling the account if no oauth
+								emailConfirmationService.sendConfirmation(
+										from: message(code: 'user.create.email.from'),
+										to: newUser.email,
+										subject: message(code: 'user.create.email.title'))
+							}
 							result = [type: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
 						}else{
 							response.status = 406

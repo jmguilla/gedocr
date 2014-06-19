@@ -40,6 +40,7 @@ class OauthController {
 	def oauthService
 	def springSecurityService
 	def authenticationManager
+	def myOAuthService
 
 	/**
 	 * This can be used as a callback for a successful OAuth authentication
@@ -97,7 +98,7 @@ class OauthController {
 			assert oAuthToken, "There is no auth token in the session!"
 			currentUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: currentUser)
 			if (currentUser.validate() && currentUser.save()) {
-				oAuthToken = updateOAuthToken(oAuthToken, currentUser)
+				oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, currentUser)
 				authenticateAndRedirect(oAuthToken, defaultTargetUrl)
 				return
 			}
@@ -126,7 +127,7 @@ class OauthController {
 				if(user && auth?.isAuthenticated()){
 					user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
 					if (user.validate() && user.save()) {
-						oAuthToken = updateOAuthToken(oAuthToken, user)
+						oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
 						return true
 					}
 				} else {
@@ -170,7 +171,7 @@ class OauthController {
 						UserRole.create user, Role.findByAuthority(roleName)
 					}
 
-					oAuthToken = updateOAuthToken(oAuthToken, user)
+					oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
 					return true
 				}
 
@@ -197,42 +198,8 @@ class OauthController {
 
 		def oAuthID = OAuthID.findByProviderAndAccessToken(oAuthToken.providerName, oAuthToken.socialId)
 		if (oAuthID) {
-			updateOAuthToken(oAuthToken, oAuthID.user)
+			myOAuthService.updateOAuthToken(oAuthToken, oAuthID.user)
 		}
-
-		return oAuthToken
-	}
-
-	protected OAuthToken updateOAuthToken(OAuthToken oAuthToken, User user) {
-		def conf = SpringSecurityUtils.securityConfig
-
-		// user
-
-		String usernamePropertyName = conf.userLookup.usernamePropertyName
-		String passwordPropertyName = conf.userLookup.passwordPropertyName
-		String enabledPropertyName = conf.userLookup.enabledPropertyName
-		String accountExpiredPropertyName = conf.userLookup.accountExpiredPropertyName
-		String accountLockedPropertyName = conf.userLookup.accountLockedPropertyName
-		String passwordExpiredPropertyName = conf.userLookup.passwordExpiredPropertyName
-
-		String username = user."${usernamePropertyName}"
-		String password = user."${passwordPropertyName}"
-		boolean enabled = enabledPropertyName ? user."${enabledPropertyName}" : true
-		boolean accountExpired = accountExpiredPropertyName ? user."${accountExpiredPropertyName}" : false
-		boolean accountLocked = accountLockedPropertyName ? user."${accountLockedPropertyName}" : false
-		boolean passwordExpired = passwordExpiredPropertyName ? user."${passwordExpiredPropertyName}" : false
-
-		// authorities
-
-		String authoritiesPropertyName = conf.userLookup.authoritiesPropertyName
-		String authorityPropertyName = conf.authority.nameField
-		Collection<?> userAuthorities = user."${authoritiesPropertyName}"
-		def authorities = userAuthorities.collect { new GrantedAuthorityImpl(it."${authorityPropertyName}") }
-
-		oAuthToken.principal = new GrailsUser(username, password, enabled, !accountExpired, !passwordExpired,
-				!accountLocked, authorities ?: [GormUserDetailsService.NO_ROLE], user.id)
-		oAuthToken.authorities = authorities
-		oAuthToken.authenticated = true
 
 		return oAuthToken
 	}

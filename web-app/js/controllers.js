@@ -9,10 +9,13 @@ google.load('visualization', '1', {
 var controllers = angular.module("controllers", []);
 
 // Main controller
-controllers.controller("MainCtrl", function($scope, $rootScope, Alert) {
+controllers.controller("MainCtrl", function($scope, $rootScope, Alert, WebSite) {
 
-	$rootScope.applicationName = "Find a fuckin name";
+	$rootScope.mainInit = function(){
+		WebSite.setTitle("mywebsite");
+	};
 
+	$rootScope.WebSite = WebSite;
 	// store alerts in a single place, the $rootScope, accessed by service Alert
 	$rootScope.alerts = [];
 	$rootScope.alertTopDisplay = true;

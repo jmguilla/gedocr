@@ -75,14 +75,27 @@ services.factory('Alert', function($rootScope, $timeout) {
 		clear : function() {
 			$rootScope.alerts = [];
 		},
-		
-		populateErrors: function(outParam, errors){
-			if(errors && errors.errors){
-				angular.forEach(errors.errors, function(value, key){
+
+		populateErrors : function(outParam, errors) {
+			if (errors && errors.errors) {
+				angular.forEach(errors.errors, function(value, key) {
 					outParam[value.field] = value;
 				}, outParam);
 			}
 			return outParam;
+		}
+	};
+})
+
+services.factory('WebSite', function($rootScope) {
+	var title = 'mywebsite';
+	return {
+		title : function() {
+			return title;
+		},
+
+		setTitle : function(newTitle) {
+			title = newTitle;
 		}
 	};
 })
