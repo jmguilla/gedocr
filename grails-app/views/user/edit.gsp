@@ -2,11 +2,7 @@
 <html>
 	<head>
 		<meta name="layout" content="account" />
-		
-		<title>fr - Settings</title>
-		
 		<r:require module="application" />
-	
 	</head>
 	<body >
 		<form class="form-horizontal" ng-controller="UserCtrl" ng-init="initUserEditView()">

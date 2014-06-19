@@ -2,15 +2,13 @@ package com.kott.fr
 
 import grails.plugins.jsonapis.JsonApi
 
-import org.springframework.validation.Errors
-
 class User {
 
 	transient springSecurityService
 
-	@JsonApi("userUpdate")
+	@JsonApi(['userUpdate', 'getUser'])
 	String email
-	@JsonApi("userUpdate")
+	@JsonApi(['userUpdate', 'getUser'])
 	String username
 	String password
 	Date signin
@@ -22,6 +20,11 @@ class User {
 	static marshalling={
 		json{
 		  userUpdate{
+			shouldOutputIdentifier false
+			shouldOutputVersion false
+			shouldOutputClass false
+		  }
+		  getUser{
 			shouldOutputIdentifier false
 			shouldOutputVersion false
 			shouldOutputClass false

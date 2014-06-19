@@ -46,6 +46,8 @@ class UserController {
 	 * TODO Check that method
 	 * @return
 	 */
+	@Transactional
+	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def getUser() {
 		def result = [:]
 		def user = null
@@ -57,7 +59,9 @@ class UserController {
 		}
 
 		result.user = user
-		render(result as JSON)
+		JSON.use('getUser'){
+			render(result as JSON)
+		}
 	}
 
 	@Transactional
