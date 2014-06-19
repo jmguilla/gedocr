@@ -15,7 +15,6 @@ class MyOAuthService {
 		def conf = SpringSecurityUtils.securityConfig
 
 		// user
-
 		String usernamePropertyName = conf.userLookup.usernamePropertyName
 		String passwordPropertyName = conf.userLookup.passwordPropertyName
 		String enabledPropertyName = conf.userLookup.enabledPropertyName

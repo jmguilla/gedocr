@@ -63,8 +63,11 @@ class OauthController {
 			return
 		}
 
+		// Do we already have the user in database?
+		def scribeToken = session[sessionKey]
+		
 		// Create the relevant authentication token and attempt to log in.
-		OAuthToken oAuthToken = createAuthToken(params.provider, session[sessionKey])
+		OAuthToken oAuthToken = createAuthToken(params.provider, scribeToken)
 
 		if (oAuthToken.principal instanceof GrailsUser) {
 			authenticateAndRedirect(oAuthToken, defaultTargetUrl)
@@ -150,9 +153,12 @@ class OauthController {
 		def providerService = grailsApplication.mainContext.getBean("${providerName}SpringSecurityOAuthService")
 		OAuthToken oAuthToken = providerService.createAuthToken(scribeToken)
 
-		def oAuthID = OAuthID.findByProviderAndAccessToken(providerName, oAuthToken.accessToken.token)
+		def oAuthID = OAuthID.find("from OAuthID as a where a.provider=:provider and a.user.email = :email", [provider: providerName, email: oAuthToken.socialId])
 		if (oAuthID) {
 			myOAuthService.updateOAuthToken(oAuthToken, oAuthID.user)
+			// taking care of updating the access_token
+			oAuthID.accessToken = oAuthToken.accessToken.token
+			oAuthID.save()
 		}
 
 		return oAuthToken
