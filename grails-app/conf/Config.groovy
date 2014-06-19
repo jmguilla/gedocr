@@ -10,7 +10,7 @@
 // if (System.properties["${appName}.config.location"]) {
 //    grails.config.locations << "file:" + System.properties["${appName}.config.location"]
 // }
-grails.app.name = "fr"
+grails.app.name = "mywebsite"
 grails.app.context = "/"
 grails.project.groupId = appName // change this to alter the default package name and Maven publishing destination
 
@@ -157,11 +157,13 @@ grails.plugin.springsecurity.facebook.appId='697131890310012'
 if(!System.getenv("FB_APP_SECRET")){
   throw new IllegalStateException("Please set FB_APP_SECRET environment variable.")
 }
+
 grails.plugin.springsecurity.facebook.secret=System.getenv("FB_APP_SECRET")
 grails.plugin.springsecurity.securityConfigType = "Annotation"
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
   '/':                              ['permitAll'],
   '/oauth/*':                       ['permitAll'],
+  '/document/upload/*':             ['IS_AUTHENTICATED_FULLY'],
   '/partials/**':					['permitAll'],
   '/login/**':                      ['permitAll'],
   '/logout/**':                     ['permitAll'],
@@ -225,7 +227,7 @@ oauth {
             successUri = '/oauth/success?provider=google'
             failureUri = '/oauth/failure'
 			callback = "${baseURL}/oauth/google/callback"
-			scope = 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'
+			scope = 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/drive'
 		}
 	}
 }

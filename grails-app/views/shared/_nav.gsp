@@ -1,4 +1,4 @@
-<div class="navbar navbar-default">
+<div class="navbar navbar-default" ng-controller="NavCtrl">
 	<div class="container">
 		<div class="navbar-header">
 			<a href="/" class="navbar-brand">{{WebSite.title()}}</a>
@@ -34,6 +34,7 @@
 							controller="user" action="show">
 							<span class="glyphicon glyphicon-user"></span> My Account</g:link></li>
 					<li><g:link url="/j_spring_security_logout">Logout</g:link></li>
+					<li><form class="navbar-form"><button ng-click="upload('${createLink(controller: 'document', action: 'upload')}')" type="submit" class="btn btn-warning btn-sm">Upload</button></form></li>
 				</sec:ifLoggedIn>
 			</ul>
 

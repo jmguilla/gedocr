@@ -24,6 +24,12 @@ controllers.controller("MainCtrl",
 
 		});
 
+controllers.controller("NavCtrl", function($scope, $window){
+	$scope.upload = function(uploadPath){
+		$window.location.href = uploadPath;
+	}
+});
+
 controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 
 	$scope.initUserEditView = function() {

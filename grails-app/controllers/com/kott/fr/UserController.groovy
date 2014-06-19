@@ -105,7 +105,7 @@ class UserController {
 							//miam miam -> wrong auth
 						}
 						if(user && auth?.isAuthenticated()){
-							user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
+							user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.accessToken.token, user: user)
 							if (user.validate() && user.save()) {
 								oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
 								result['type'] = 'success'
@@ -158,7 +158,7 @@ class UserController {
 							OAuthToken oAuthToken = session[OauthController.SPRING_SECURITY_OAUTH_TOKEN]
 							if(oAuthToken){
 								newUser.enabled = true
-								newUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: newUser)
+								newUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.accessToken.token, user: newUser)
 								if (newUser.validate() && newUser.save()) {
 									oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, newUser)
 									myOAuthService.authenticate(session, oAuthToken)

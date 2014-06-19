@@ -150,7 +150,7 @@ class OauthController {
 		def providerService = grailsApplication.mainContext.getBean("${providerName}SpringSecurityOAuthService")
 		OAuthToken oAuthToken = providerService.createAuthToken(scribeToken)
 
-		def oAuthID = OAuthID.findByProviderAndAccessToken(oAuthToken.providerName, oAuthToken.socialId)
+		def oAuthID = OAuthID.findByProviderAndAccessToken(providerName, oAuthToken.accessToken.token)
 		if (oAuthID) {
 			myOAuthService.updateOAuthToken(oAuthToken, oAuthID.user)
 		}
