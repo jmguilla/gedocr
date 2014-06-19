@@ -5,12 +5,17 @@ import grails.plugin.springsecurity.annotation.Secured
 import grails.plugin.springsecurity.oauth.OAuthToken
 import grails.transaction.Transactional
 
+import org.springframework.security.authentication.BadCredentialsException
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.core.Authentication
+
 
 class UserController {
 
 	static allowedMethods = [create: ['POST', 'GET'], update: 'POST', updatePWD: 'POST', confirmed: 'GET']
 
 	def emailConfirmationService
+	def authenticationManager
 	def userService
 	def springSecurityService
 	def saltSource
@@ -70,6 +75,67 @@ class UserController {
 
 	@Transactional
 	@Secured(['permitAll'])
+	/**
+	 * Associates an OAuthID with an existing account. Needs the user's password to ensure
+	 * that the user owns that account, and authenticates to verify before linking.
+	 */
+	def linkAccount(OAuthLinkAccountCommand command){
+		withFormat{
+			html{
+				redirect controller: 'OauthController', action: 'askToLinkOrCreateAccount()'
+			}
+			json{
+				OAuthToken oAuthToken = session[OauthController.SPRING_SECURITY_OAUTH_TOKEN]
+				assert oAuthToken, "There is no auth token in the session!"
+				def result = [:]
+
+				if (request.post) {
+					boolean linked = command.validate() && User.withTransaction { status ->
+						UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(command.email, command.password);
+						Authentication auth = null
+						User user = null
+						try{
+							auth = authenticationManager.authenticate(token)
+							user = User.findByEmail(command.email)
+						}catch(BadCredentialsException bce){
+							//miam miam -> wrong auth
+						}
+						if(user && auth?.isAuthenticated()){
+							user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
+							if (user.validate() && user.save()) {
+								oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
+								result['type'] = 'success'
+								result['message'] = message(code: 'user.oauth.link.success', default: 'Accounts properly linked')
+								return true
+							}
+						} else {
+							response.status = 406
+							command.errors.rejectValue("email", "OAuthLinkAccountCommand.email.not.exists")
+							result['type'] = 'danger'
+							result['message'] = message(code: 'user.oauth.link.failure', default: 'Cannot link accounts')
+							result['command'] = command
+						}
+
+						status.setRollbackOnly()
+						return false
+					}
+
+					if (linked) {
+						myOAuthService.authenticate(session, oAuthToken)
+					}
+					render result as JSON
+					return
+				}else{
+					response.status = 405
+					return
+				}
+			}
+		}
+		response.status = 406
+	}
+
+	@Transactional
+	@Secured(['permitAll'])
 	def create(UserRegistrationCommand command){
 		withFormat{
 			html{
@@ -84,14 +150,15 @@ class UserController {
 						User newUser = null
 						if(command.validate() && !(newUser = userService.create(command.properties))?.hasErrors()){
 							// treating the case when the user creation is done after oauth authentication
+							// TODO check email confirmation in both cases
 							OAuthToken oAuthToken = session[OauthController.SPRING_SECURITY_OAUTH_TOKEN]
 							if(oAuthToken){
 								newUser.enabled = true
 								newUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: newUser)
 								if (newUser.validate() && newUser.save()) {
 									oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, newUser)
+									myOAuthService.authenticate(session, oAuthToken)
 								}
-								// no authenticating
 							}else{
 								// we only need confirmation for enabling the account if no oauth
 								emailConfirmationService.sendConfirmation(
@@ -193,5 +260,15 @@ class UserRegistrationCommand {
 		importFrom User, include: ["username", "email", "password"]
 		emailConfirmation blank: false, validator: { val, UserRegistrationCommand obj -> obj.email.equals(val)}
 		passwordConfirmation blank: false, validator: { val, UserRegistrationCommand obj -> obj.password.equals(val)}
+	}
+}
+
+@grails.validation.Validateable
+class OAuthLinkAccountCommand {
+	String email
+	String password
+
+	static constraints = {
+		importFrom User, include: ["email", "password"]
 	}
 }

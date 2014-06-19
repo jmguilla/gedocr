@@ -2,27 +2,16 @@
 <html>
 	<head>
 	<meta name='layout' content='main' />
-	
 	<title><g:message code="springSecurity.login.title" /></title>
-	
 	<r:require module="application" />
-	
 	<link rel="stylesheet" href="${resource(dir: 'css', file: 'auth.css')}">
 	</head>
-
 	<body>
-	
 		<div class="container">
-			
 			<sec:ifNotLoggedIn roles="ROLE_USER">
 				<div class="row">
-				
 					<div class="col-lg-6 col-lg-offset-3">
-						
-						<g:render template="/shared/alerts" />
-						
 						<div class="well">
-		
 							<form class="form-horizontal" id="loginForm"
 								action='${request.contextPath}/j_spring_security_check'
 								method='POST'>

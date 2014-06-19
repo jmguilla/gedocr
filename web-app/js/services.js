@@ -36,6 +36,17 @@ services.factory('User', function($resource) {
 				'Content-Type' : 'application/json',
 				'Accept' : 'application/json'
 			}
+		},
+		
+		linkAccount: {
+			method: 'POST',
+			params: {
+				actionId: 'linkAccount'
+			},
+			headers : {
+				'Content-Type' : 'application/json',
+				'Accept' : 'application/json'
+			}
 		}
 	});
 })
@@ -76,7 +87,8 @@ services.factory('Alert', function($rootScope, $timeout) {
 			$rootScope.alerts = [];
 		},
 
-		populateErrors : function(outParam, errors) {
+		populateErrors : function(errors) {
+			var outParam = {};
 			if (errors && errors.errors) {
 				angular.forEach(errors.errors, function(value, key) {
 					outParam[value.field] = value;

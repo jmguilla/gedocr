@@ -5,7 +5,10 @@ import grails.plugin.springsecurity.oauth.OAuthToken
 import grails.plugin.springsecurity.userdetails.GormUserDetailsService
 import grails.plugin.springsecurity.userdetails.GrailsUser
 
+import javax.servlet.http.HttpSession
+
 import org.springframework.security.core.authority.GrantedAuthorityImpl
+import org.springframework.security.core.context.SecurityContextHolder
 
 class MyOAuthService {
 	public OAuthToken updateOAuthToken(OAuthToken oAuthToken, User user) {
@@ -40,5 +43,10 @@ class MyOAuthService {
 		oAuthToken.authenticated = true
 
 		return oAuthToken
+	}
+	
+	protected void authenticate(HttpSession session, OAuthToken oAuthToken) {
+		session.removeAttribute OauthController.SPRING_SECURITY_OAUTH_TOKEN
+		SecurityContextHolder.context.authentication = oAuthToken
 	}
 }

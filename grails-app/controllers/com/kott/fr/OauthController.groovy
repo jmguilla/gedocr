@@ -17,15 +17,13 @@ package com.kott.fr
 
 import grails.plugin.springsecurity.SpringSecurityUtils
 import grails.plugin.springsecurity.oauth.OAuthToken
-import grails.plugin.springsecurity.userdetails.GormUserDetailsService
 import grails.plugin.springsecurity.userdetails.GrailsUser
 
 import javax.annotation.security.PermitAll
 
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
-import org.springframework.security.core.authority.GrantedAuthorityImpl
 import org.springframework.security.core.context.SecurityContextHolder
 
 /**
@@ -39,7 +37,6 @@ class OauthController {
 	def grailsApplication
 	def oauthService
 	def springSecurityService
-	def authenticationManager
 	def myOAuthService
 
 	/**
@@ -103,49 +100,6 @@ class OauthController {
 				return
 			}
 		}
-	}
-
-	/**
-	 * Associates an OAuthID with an existing account. Needs the user's password to ensure
-	 * that the user owns that account, and authenticates to verify before linking.
-	 */
-	def linkAccount(OAuthLinkAccountCommand command){
-		OAuthToken oAuthToken = session[SPRING_SECURITY_OAUTH_TOKEN]
-		assert oAuthToken, "There is no auth token in the session!"
-
-		if (request.post) {
-			boolean linked = command.validate() && User.withTransaction { status ->
-				UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(command.email, command.password);
-				Authentication auth = null
-				User user = null
-				try{
-					auth = authenticationManager.authenticate(token)
-					user = User.findByEmail(command.email)
-				}catch(BadCredentialsException bce){
-					//miam miam -> wrong auth
-				}
-				if(user && auth?.isAuthenticated()){
-					user.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.socialId, user: user)
-					if (user.validate() && user.save()) {
-						oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, user)
-						return true
-					}
-				} else {
-					command.errors.rejectValue("email", "OAuthLinkAccountCommand.email.not.exists")
-				}
-
-				status.setRollbackOnly()
-				return false
-			}
-
-			if (linked) {
-				authenticateAndRedirect(oAuthToken, defaultTargetUrl)
-				return
-			}
-		}
-
-		render view: 'askToLinkOrCreateAccount', model: [linkAccountCommand: command]
-		return
 	}
 
 	def createAccount(OAuthCreateAccountCommand command){
@@ -303,11 +257,14 @@ class OauthController {
 			return [uri: (config.successHandler.defaultTargetUrl ?: defaultUrlOnNull)]
 		}
 	}
+	
+	protected void authenticate(OAuthToken oAuthToken) {
+		session.removeAttribute SPRING_SECURITY_OAUTH_TOKEN
+		SecurityContextHolder.context.authentication = oAuthToken
+	}
 
 	protected void authenticateAndRedirect(OAuthToken oAuthToken, redirectUrl) {
-		session.removeAttribute SPRING_SECURITY_OAUTH_TOKEN
-
-		SecurityContextHolder.context.authentication = oAuthToken
+		myOAuthService.authenticate(session, oAuthToken)
 		redirect(redirectUrl instanceof Map ? redirectUrl : [uri: redirectUrl])
 	}
 
@@ -344,16 +301,4 @@ class OAuthCreateAccountCommand {
 			}
 		}
 	}
-}
-
-class OAuthLinkAccountCommand {
-
-	String email
-	String password
-
-	static constraints = {
-		email blank: false
-		password blank: false
-	}
-
 }
