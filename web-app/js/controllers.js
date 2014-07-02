@@ -32,10 +32,6 @@ controllers.controller("NavCtrl", function($scope, $window) {
 
 controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 
-	$scope.initUserEditView = function() {
-		$scope.getUser();
-	}
-
 	$scope.initUserView = function() {
 		$scope.getUser();
 	}
@@ -49,6 +45,11 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		$scope.initUserRegistrationView();
 		$scope.command = {};
 		$scope.command.errors = {};
+	}
+
+	$scope.initUserEditView = function() {
+		$scope.getUser();
+		$scope.initAccountLinkView();
 	}
 
 	/**
@@ -102,7 +103,6 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		});
 	}
 
-
 	$scope.update = function() {
 		User.update($scope.user, function(data, headers) {
 			// reset fields
@@ -114,5 +114,17 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 					.populateErrors(httpResponse.data.command.errors);
 			Alert.addAlert(httpResponse.data);
 		});
+	}
+});
+
+controllers.controller("UploadCtrl", function($scope, Document, Alert) {
+	$scope.init = function() {
+		Document.directories(function(data, header){
+			$scope.directories = data.result;
+		},function(httpResponse){
+			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
+			
+		});
+		$scope.filter = "";
 	}
 });

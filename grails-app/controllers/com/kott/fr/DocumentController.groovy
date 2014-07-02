@@ -1,5 +1,6 @@
 package com.kott.fr
 
+import grails.converters.JSON
 import grails.plugin.springsecurity.annotation.Secured
 import grails.transaction.Transactional
 
@@ -15,10 +16,78 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.JsonFactory
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.google.api.services.drive.Drive
+import com.google.api.services.drive.model.About
+import com.google.api.services.drive.model.FileList
+import com.google.api.services.drive.model.ParentReference
+
 
 class DocumentController {
-	
+
 	def springSecurityService
+
+	def static forTesting = null
+
+	@Transactional
+	@Secured(['IS_AUTHENTICATED_FULLY'])
+	public directories(){
+		withFormat{
+			json{
+				if(!forTesting){
+					HttpTransport httpTransport = new NetHttpTransport()
+					JsonFactory jsonFactory = new JacksonFactory()
+					GoogleCredential credential = new GoogleCredential().setAccessToken(springSecurityService.currentUser.oAuthIDs[0].accessToken)
+					Drive drive =  new Drive.Builder(httpTransport, jsonFactory, credential).build()
+					About about = drive.about().get().execute();
+					String rootFolderId = about.getRootFolderId()
+					Drive.Files.List driveRequest = drive.files().list()
+					driveRequest.setQ("mimeType = 'application/vnd.google-apps.folder'")
+					FileList directories = null
+					HashMap<String, Node> idToFile = new HashMap<String, Node>()
+					while((directories = driveRequest.execute()) && driveRequest.setPageToken(directories.getNextPageToken())
+					&& driveRequest.getPageToken() != null && driveRequest.getPageToken().length() > 0){
+						directories.getItems().each{
+							idToFile.put(it.getId(), new Node(null, it))
+						}
+					}
+					def rootNodes = []
+					idToFile.keySet().each{key ->
+						Node file = idToFile.get(key)
+						if(file.name().getParents()){
+							Node parent = idToFile.get(file.name().getParents()[0].getId())
+							file.setParent(parent)
+							if(parent){
+								parent.append(file)
+							}
+							if(rootFolderId.equals(file.name().getParents()[0].getId())){
+								rootNodes << file
+							}
+						}
+					}
+					forTesting = rootNodes
+				}
+				def result = []
+				def append = { path, node, outParam, method ->
+					def currentPath = path + node.name().getTitle()
+					outParam << [path: currentPath, node: node.name()] 
+					if(node.children()){
+						node.children().each{
+							method(currentPath + "/", it, outParam, method)
+						}
+					}
+				}
+				forTesting.each{
+					append("/", it, result, append)
+				}
+				JSON.use("deep"){
+					render([type: 'success', message: 'Here are your directdories', result: result] as JSON)
+				}
+			}
+			'*'{
+				response.status = 406
+				render([type: 'danger', message: 'Serving only json'] as JSON)
+			}
+		}
+	}
 
 	@Transactional
 	@Secured(['IS_AUTHENTICATED_FULLY'])
@@ -35,23 +104,22 @@ class DocumentController {
 					}
 					InputStreamContent mediaContent = new InputStreamContent(f.getContentType(), new BufferedInputStream(f.getInputStream()))
 					mediaContent.setLength(f.getSize())
-				    HttpTransport httpTransport = new NetHttpTransport();
-				    JsonFactory jsonFactory = new JacksonFactory();
+					HttpTransport httpTransport = new NetHttpTransport()
+					JsonFactory jsonFactory = new JacksonFactory()
 					GoogleCredential credential = new GoogleCredential().setAccessToken(springSecurityService.currentUser.oAuthIDs[0].accessToken)
-					Drive drive =  new Drive.Builder(httpTransport, jsonFactory, credential).build();
-					com.google.api.services.drive.model.File body = new com.google.api.services.drive.model.File();
-					body.setTitle(f.getOriginalFilename());
-					body.setDescription("A test document");
-					body.setMimeType(f.getContentType());
-					Drive.Files.Insert driveRequest = drive.files().insert(body, mediaContent);
-					driveRequest.getMediaHttpUploader().setProgressListener(new CustomProgressListener());
-					driveRequest.execute();
-					response.sendError(200, 'Done')
-				}else{
-					render view: 'upload'
+					Drive drive =  new Drive.Builder(httpTransport, jsonFactory, credential).build()
+					com.google.api.services.drive.model.File body = new com.google.api.services.drive.model.File()
+					body.setTitle(f.getOriginalFilename())
+					body.setDescription("A test document")
+					body.setMimeType(f.getContentType())
+					body.setParents(Arrays.asList(new ParentReference().setId("0B5DEy30M04E2S2hocVFERExfVms")))
+					Drive.Files.Insert driveRequest = drive.files().insert(body, mediaContent)
+					driveRequest.getMediaHttpUploader().setProgressListener(new CustomProgressListener())
+					driveRequest.execute()
+					flash.type = 'success'
+					flash.message = 'upload successful'
 				}
 			}
-
 		}
 	}
 }

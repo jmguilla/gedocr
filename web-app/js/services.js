@@ -122,3 +122,21 @@ services.factory('WebSite', function($rootScope) {
 		}
 	};
 })
+
+services.factory('Document', function($resource) {
+	return $resource('/document/:actionId/:documentId.json', {
+		actionId : '',
+		userId : '@id'
+	},{
+		directories: {
+			method: 'GET',
+			params: {
+				actionId: 'directories'
+			},
+			headers : {
+				'Content-Type' : 'application/json',
+				'Accept' : 'application/json'
+			}
+		}
+	});
+})

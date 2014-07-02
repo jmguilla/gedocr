@@ -3,7 +3,7 @@
 <div ng-show="alertTopDisplay"> 
 	<!-- flash -->
 	<g:if test='${flash.message}'>
-		<div class="alert alert-danger fade in">
+		<div class="alert alert-${flash.type} fade in">
 			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
 			<div class="textNoShadow">
 				<span> ${flash.message}
