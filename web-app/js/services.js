@@ -123,8 +123,8 @@ services.factory('WebSite', function($rootScope) {
 	};
 })
 
-services.factory('Document', function($resource) {
-	return $resource('/document/:actionId/:documentId.json', {
+services.factory('INode', function($resource) {
+	return $resource('/INode/:actionId/:inodeId.json', {
 		actionId : '',
 		userId : '@id'
 	},{

@@ -163,7 +163,7 @@ grails.plugin.springsecurity.securityConfigType = "Annotation"
 grails.plugin.springsecurity.controllerAnnotations.staticRules = [
   '/':                              ['permitAll'],
   '/oauth/*':                       ['permitAll'],
-  '/document/upload/*':             ['IS_AUTHENTICATED_FULLY'],
+  '/INode/upload/*':                ['IS_AUTHENTICATED_FULLY'],
   '/partials/**':					['permitAll'],
   '/login/**':                      ['permitAll'],
   '/logout/**':                     ['permitAll'],

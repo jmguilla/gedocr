@@ -21,7 +21,7 @@ import com.google.api.services.drive.model.FileList
 import com.google.api.services.drive.model.ParentReference
 
 
-class DocumentController {
+class INodeController {
 
 	def springSecurityService
 
@@ -32,6 +32,7 @@ class DocumentController {
 	public directories(){
 		withFormat{
 			json{
+				def rootNodes = []
 				if(!forTesting){
 					HttpTransport httpTransport = new NetHttpTransport()
 					JsonFactory jsonFactory = new JacksonFactory()
@@ -46,40 +47,36 @@ class DocumentController {
 					while((directories = driveRequest.execute()) && driveRequest.setPageToken(directories.getNextPageToken())
 					&& driveRequest.getPageToken() != null && driveRequest.getPageToken().length() > 0){
 						directories.getItems().each{
-							idToFile.put(it.getId(), new Node(null, it))
+							idToFile.put(it.getId(), new Node(null, [node: it, inode: new INode(name: it.getTitle(), mimeType: "inode/directory", filesystemID: it.getId())]))
 						}
 					}
-					def rootNodes = []
 					idToFile.keySet().each{key ->
 						Node file = idToFile.get(key)
-						if(file.name().getParents()){
-							Node parent = idToFile.get(file.name().getParents()[0].getId())
-							file.setParent(parent)
+						if(file.name()["node"].getParents()){
+							Node parent = idToFile.get(file.name()["node"].getParents()[0].getId())
 							if(parent){
+								file.setParent(parent)
+								file.name()["inode"].addToParents(parent.name()["inode"])
+								parent.name()["inode"].addToChildren(file.name()["inode"])
 								parent.append(file)
 							}
-							if(rootFolderId.equals(file.name().getParents()[0].getId())){
-								rootNodes << file
+							if(rootFolderId.equals(file.name()["node"].getParents()[0].getId())){
+								rootNodes << file.name()["inode"]
 							}
 						}
 					}
 					forTesting = rootNodes
-				}
-				def result = []
-				def append = { path, node, outParam, method ->
-					def currentPath = path + node.name().getTitle()
-					outParam << [path: currentPath, node: node.name()] 
-					if(node.children()){
-						node.children().each{
-							method(currentPath + "/", it, outParam, method)
-						}
+					def saveRecurse = { INode inode, method ->
+						inode.save(failOnError: true)
+						inode.children?.each{method(it, method)}
 					}
+					rootNodes.each{saveRecurse(it, saveRecurse)}
+				}else{
+					rootNodes = forTesting
 				}
-				forTesting.each{
-					append("/", it, result, append)
-				}
-				JSON.use("deep"){
-					render([type: 'success', message: 'Here are your directdories', result: result] as JSON)
+					
+				JSON.use("directoryWithPath"){
+					render([type: 'success', message: 'Here are your directdories', result: rootNodes] as JSON)
 				}
 			}
 			'*'{

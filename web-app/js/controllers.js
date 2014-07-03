@@ -117,9 +117,9 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 	}
 });
 
-controllers.controller("UploadCtrl", function($scope, Document, Alert) {
+controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
-		Document.directories(function(data, header){
+		INode.directories(function(data, header){
 			$scope.directories = data.result;
 		},function(httpResponse){
 			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
