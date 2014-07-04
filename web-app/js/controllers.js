@@ -119,8 +119,19 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 
 controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
+		
+		$scope.directories = [];
 		INode.directories(function(data, header){
-			$scope.directories = data.result;
+			var flattenDirectories = function(directories, outParam){
+				angular.forEach(directories, function(value){
+					this.push(value);
+					if(value.children !== undefined && value.children.length > 0){
+						flattenDirectories(value.children, outParam)
+					}
+				}, outParam); 
+			};
+			
+			flattenDirectories(data.result, $scope.directories);
 		},function(httpResponse){
 			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
 			

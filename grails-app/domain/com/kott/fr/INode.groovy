@@ -6,12 +6,12 @@ class INode {
 	
 	private static final String pathSeparator = '/'
 	
-	@JsonApi(['directoryWithPath'])
+	@JsonApi(['directoriesWithPath'])
 	String name
 	
 	String filesystemID
 	
-	@JsonApi(['directoryWithPath'])
+	@JsonApi(['directoriesWithPath'])
 	String mimeType
 
 	static hasMany = [
@@ -20,10 +20,10 @@ class INode {
 		children: INode
 	]
 
-	@JsonApi(['directoryWithPath'])
+	@JsonApi(['directoriesWithPath'])
 	Set tags
 
-	@JsonApi(['directoryWithPath'])
+	@JsonApi(['directoriesWithPath'])
 	Set children
 
 	static mappedBy = [parents: "children", children: "parents"]
@@ -39,7 +39,7 @@ class INode {
 	
 	static marshalling={
 		json{
-		  directoryWithPath{
+		  directoriesWithPath{
 			shouldOutputIdentifier false
 			shouldOutputVersion false
 			shouldOutputClass false
@@ -47,7 +47,7 @@ class INode {
 		}
 	  }
 	
-	@JsonApi(['directoryWithPath'])
+	@JsonApi(['directoriesWithPath'])
 	List<String> getPaths() {
 		def result = []
 		if(parents){
