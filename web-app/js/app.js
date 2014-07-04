@@ -1,6 +1,6 @@
 // Main controller
 var frApp = angular.module("app", [ "ngRoute", "controllers", "services",
-		"filters", "directives", "ui.bootstrap" ]);
+		"gedocr.filters", "directives", "ui.bootstrap" ]);
 
 /**
  * russian fix (i know...) to avoid angular compilation error : "Controller

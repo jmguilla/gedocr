@@ -119,7 +119,6 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 
 controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
-		
 		$scope.directories = [];
 		INode.directories(function(data, header){
 			var flattenDirectories = function(directories, outParam){
@@ -128,13 +127,13 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 					if(value.children !== undefined && value.children.length > 0){
 						flattenDirectories(value.children, outParam)
 					}
+					value.children = [];
 				}, outParam); 
 			};
 			
 			flattenDirectories(data.result, $scope.directories);
 		},function(httpResponse){
 			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
-			
 		});
 		$scope.filter = "";
 	}

@@ -22,7 +22,7 @@
 		    <label for="search-result" class="col-sm-2 control-label">Result</label>
 		    <div class="col-sm-10">
 		      <select size="5" name="search-result" class="form-control" id="search-result">
-		      	<option ng-repeat="directory in directories|filter:filter|limitTo: 5" ng-value="directory.paths[0]">{{directory.paths[0]}}</option>
+		      	<option ng-repeat="directory in directories|fileFilter:filter|limitTo: 5" ng-value="directory.paths[0]">{{directory.paths[0]}}</option>
 		      </select>
 		    </div>
 		  </div>
