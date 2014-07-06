@@ -119,6 +119,9 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 
 controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
+		$scope.selectedDirectory = undefined;
+		$scope.displaySelectDirectory = true;
+		$scope.selectSize = 5;
 		$scope.directories = [];
 		INode.directories(function(data, header){
 			var flattenDirectories = function(directories, outParam){
