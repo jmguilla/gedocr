@@ -44,7 +44,7 @@
 				<div class="form-group">
 					<label for="username" class="col-lg-2 control-label">UserName</label>
 					<div class="col-lg-10">
-						<input type="text" class="form-control" id="username" value="{{user.username}}">
+						<input type="text" class="form-control" id="username" ng-model="user.username">
 					</div>
 				</div>
 				<div class="form-group">
