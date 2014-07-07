@@ -23,7 +23,7 @@
 		    <label for="search-result" class="col-sm-2 control-label">Target Folder</label>
 		    <div class="col-sm-9 input-group">
 		      	<select class="form-control" size="5" id="search-result" ng-model="$parent.selectedDirectory" ng-options="directory.paths[0] for directory in directories|fileFilter:filter|limitTo:selectSize" ng-change="$parent.displaySelectDirectory=!$parent.displaySelectDirectory; $parent.filter = ''">
-		      		<option class="list-group-item" value="" ng-if="selectedDirectory == undefined">-- loading --</option>
+		      		<option class="list-group-item" value="" ng-if="$parent.directories == undefined">-- loading --</option>
 				</select>
 		    </div>
 		  </div>

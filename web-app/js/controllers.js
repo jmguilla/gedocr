@@ -124,7 +124,7 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 		$scope.askToCreateDir = true;
 		$scope.filter = "";
 		$scope.selectSize = 5;
-		$scope.directories = [];
+		$scope.directories = undefined;
 		$scope.$watch('filter', function(newValue, oldValue) {
 			if(newValue == '' && !angular.isUndefined(oldValue) && oldValue != ''){
 				$scope.selectSize = $scope.directories.length;
@@ -144,7 +144,7 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 					value.children = [];
 				}, outParam); 
 			};
-			
+			$scope.directories = [];
 			flattenDirectories(data.result, $scope.directories);
 			$scope.selectSize = $scope.directories.length;
 		},function(httpResponse){
