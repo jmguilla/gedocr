@@ -22,7 +22,7 @@
 		  <div class="form-group" ng-if="displaySelectDirectory">
 		    <label for="search-result" class="col-sm-2 control-label">Target Folder</label>
 		    <div class="col-sm-9 input-group">
-		      	<select class="form-control" size="5" id="search-result" ng-model="$parent.selectedDirectory" ng-options="directory.paths[0] for directory in directories|fileFilter:filter|limitTo:selectSize" ng-change="$parent.displaySelectDirectory=!$parent.displaySelectDirectory">
+		      	<select class="form-control" size="5" id="search-result" ng-model="$parent.selectedDirectory" ng-options="directory.paths[0] for directory in directories|fileFilter:filter|limitTo:selectSize" ng-change="$parent.displaySelectDirectory=!$parent.displaySelectDirectory; $parent.filter = ''">
 		      		<option class="list-group-item" value="" ng-if="selectedDirectory == undefined">-- loading --</option>
 				</select>
 		    </div>
@@ -30,8 +30,12 @@
 		  <div class="form-group" ng-if="selectedDirectory != undefined">
 		    <label for="search-result" class="col-sm-2 control-label">Target Folder</label>
 		    <div class="input-group col-sm-9">
+		    	<span ng-if="askToCreateDir == false" class="input-group-btn">
+                    <button class="btn btn-primary"><i>create!</i></button>
+                </span>
 		    	<span class="input-group-addon">{{selectedDirectory.paths[0] + "/"}}</span>
-		    	<input type="text" class="form-control" />
+		    	<span class="form-control" ng-if="askToCreateDir == true"><a href="#" ng-click="$parent.askToCreateDir = false">+ new directory</a></span>
+		    	<input ng-if="askToCreateDir == false" type="text" class="form-control" />
 		    </div>
 		  </div>
 		  <div class="form-group">

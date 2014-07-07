@@ -121,8 +121,19 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
 		$scope.selectedDirectory = undefined;
 		$scope.displaySelectDirectory = true;
+		$scope.askToCreateDir = true;
+		$scope.filter = "";
 		$scope.selectSize = 5;
 		$scope.directories = [];
+		$scope.$watch('filter', function(newValue, oldValue) {
+			if(newValue == '' && !angular.isUndefined(oldValue) && oldValue != ''){
+				$scope.selectSize = $scope.directories.length;
+			}else{
+				if(oldValue == '' && !angular.isUndefined(newValue) && newValue != ''){
+					$scope.selectSize = 5;
+				}
+			}
+    });
 		INode.directories(function(data, header){
 			var flattenDirectories = function(directories, outParam){
 				angular.forEach(directories, function(value){
@@ -135,9 +146,9 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 			};
 			
 			flattenDirectories(data.result, $scope.directories);
+			$scope.selectSize = $scope.directories.length;
 		},function(httpResponse){
 			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
 		});
-		$scope.filter = "";
 	}
 });
