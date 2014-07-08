@@ -10,6 +10,15 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.http.HttpTransport
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.drive.Drive
+import com.google.api.services.drive.model.About
+import com.google.api.services.drive.model.FileList
+
 
 class UserController {
 
@@ -25,7 +34,7 @@ class UserController {
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def accounts(){
 		User user = springSecurityService.getCurrentUser()
-		def oAuthIDs = user.oAuthIDs // force loading 
+		def oAuthIDs = user.oAuthIDs // force loading
 		render view: 'accounts', model: [user: user]
 	}
 	/**
@@ -63,9 +72,7 @@ class UserController {
 		else{
 			result.user = "not logged";
 		}
-		JSON.use(params.serialize?:'getUser'){
-			render(result as JSON)
-		}
+		JSON.use(params.serialize?:'getUser'){ render(result as JSON) }
 	}
 
 	@Transactional
@@ -78,6 +85,63 @@ class UserController {
 			user.enabled = true
 			user.save(failOnError: true, flush: true)
 			return [uri:'/', args:[type: 'success', message: message(code: 'user.confirmation.success', default: 'Thanks for having confirmed your email.')]]
+		}
+	}
+
+	@Transactional(readOnly = false)
+	@Secured(['IS_AUTHENTICATED_FULLY'])
+	def syncProvider(){
+		withFormat{
+			json{
+				if(!params.provider){
+					response.status = 404
+					render([type: 'alert', message: message(code: 'user.provider.sync.missingparam', default: 'No provider in the request')] as JSON)
+					return
+				}
+				def owner = springSecurityService.getCurrentUser()
+				def rootNodes = []
+				HttpTransport httpTransport = new NetHttpTransport()
+				JsonFactory jsonFactory = new JacksonFactory()
+				GoogleCredential credential = new GoogleCredential().setAccessToken(springSecurityService.currentUser.oAuthIDs[0].accessToken)
+				Drive drive =  new Drive.Builder(httpTransport, jsonFactory, credential).build()
+				About about = drive.about().get().execute();
+				String rootFolderId = about.getRootFolderId()
+				Drive.Files.List driveRequest = drive.files().list()
+				driveRequest.setQ("mimeType = 'application/vnd.google-apps.folder' and trashed = false and (title contains 'Coursera' or '0B5DEy30M04E2d2RCSVZocUd4cnc' in parents)")
+				FileList directories = null
+				HashMap<String, Node> idToFile = new HashMap<String, Node>()
+				while((directories = driveRequest.execute())){
+					directories.getItems().each{
+						def iNode = new INode(owner: owner, name: it.getTitle(), mimeType: "inode/directory", filesystemID: it.getId()).save(failOnError: true)
+						owner.addToINodes(iNode)
+						idToFile.put(it.getId(), new Node(null, [node: it, inode: iNode]))
+					}
+					if(!(driveRequest.setPageToken(directories.getNextPageToken()) && driveRequest.getPageToken() != null && driveRequest.getPageToken().length() > 0)){
+						break;
+					}
+				}
+				idToFile.keySet().each{key ->
+					Node file = idToFile.get(key)
+					if(file.name()["node"].getParents()){
+						Node parent = idToFile.get(file.name()["node"].getParents()[0].getId())
+						if(parent){
+							file.setParent(parent)
+							parent.name()["inode"].addToChildren(file.name()["inode"])
+							parent.append(file)
+						}
+						if(rootFolderId.equals(file.name()["node"].getParents()[0].getId())){
+							rootNodes << file.name()["inode"]
+						}
+					}
+				}
+				def saveRecurse = { INode inode, method ->
+					inode.save(failOnError: true, flush: true)
+					inode.children?.each{method(it, method)}
+				}
+//				rootNodes.each{saveRecurse(it, saveRecurse)}
+				owner.save(failOnError: true, flush: true)
+				render([type: 'success', message: 'import success'] as JSON)
+			}
 		}
 	}
 
@@ -98,8 +162,7 @@ class UserController {
 				def result = [:]
 
 				if (request.post) {
-					boolean linked = command.validate() && User.withTransaction {
-						status ->
+					boolean linked = command.validate() && User.withTransaction { status ->
 						UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(command.email, command.password);
 						Authentication auth = null
 						User user = null
@@ -171,9 +234,9 @@ class UserController {
 							}else{
 								// we only need confirmation for enabling the account if no oauth
 								emailConfirmationService.sendConfirmation(
-								from: message(code: 'user.create.email.from'),
-								to: newUser.email,
-								subject: message(code: 'user.create.email.title'))
+										from: message(code: 'user.create.email.from'),
+										to: newUser.email,
+										subject: message(code: 'user.create.email.title'))
 							}
 							result = [type: 'success', message: message(code: 'user.create.success', default: 'User created!!'), user: newUser]
 						}else{

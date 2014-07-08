@@ -16,8 +16,18 @@ class INode {
 
 	static hasMany = [
 		tags: Tag,
-		parents: INode,
-		children: INode
+		parents: ILink,
+		children: ILink
+	]
+	
+	static belongsTo = [
+		owner: User,
+		parents: Set
+		]
+	
+	static mappedBy = [
+		children: 'parent',
+		parents: 'child'	
 	]
 
 	@JsonApi(['directoriesWithPath'])
@@ -25,14 +35,14 @@ class INode {
 
 	@JsonApi(['directoriesWithPath'])
 	Set children
-
-	static mappedBy = [parents: "children", children: "parents"]
+	
+	Set parents
 
 	static constraints = {
 		name nullable: false, blank: false
 		mimeType nullable: false, blank: false, default: "UNKNOWN"
 		parents nullable: true
-		
+		children nullable: true
 		}
 	
 	static transients = ['paths']
@@ -51,11 +61,17 @@ class INode {
 	List<String> getPaths() {
 		def result = []
 		if(parents){
-			parents.each{result.addAll(it.getPaths().collect{ it + pathSeparator + name})}
+			parents.each{result.addAll(it.parent.getPaths().collect{ it + pathSeparator + name})}
 		}else{
 			result = [pathSeparator + name]
 		}
 		result
 	}
 	
+	void addToChildren(INode node){
+		if(children == null){
+			children = []
+		}
+		children.add(new ILink(parent: this, child: node));
+	}
 }

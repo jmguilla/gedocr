@@ -16,8 +16,8 @@ environments {
   development {
     dataSource {
       // we are using database-migration plugin, see http://spring.io/blog/2011/08/17/countdown-to-grails-2-0-database-migrations/
-      dbCreate = 'update' //one of 'create', 'create-drop', 'update', 'validate', ''
-      url = "jdbc:h2:file:./h2db/devDb.h2;MVCC=TRUE;LOCK_TIMEOUT=10000"
+      dbCreate = 'create-drop' //one of 'create', 'create-drop', 'update', 'validate', ''
+      url = "jdbc:h2:file:./h2db/devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
     }
   }
   test {

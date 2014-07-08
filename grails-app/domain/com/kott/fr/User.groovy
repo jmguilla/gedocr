@@ -40,8 +40,11 @@ class User {
 		}
 	  }
 
-	static hasMany = [oAuthIDs: OAuthID]
-
+	static hasMany = [
+		oAuthIDs: OAuthID,
+		iNodes: INode
+		]
+	
 	static transients = ['springSecurityService']
 
 	static constraints = {

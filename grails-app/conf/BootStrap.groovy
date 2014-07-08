@@ -1,60 +1,79 @@
+import grails.converters.JSON
 import grails.util.Environment
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 
+import com.kott.fr.ILink
+import com.kott.fr.INode
 import com.kott.fr.Role
 import com.kott.fr.User
 import com.kott.fr.UserRole
 
 class BootStrap {
 
-  def init = { servletContext ->
-    JSONObject.NULL.metaClass.asBoolean = {-> false}
+	def init = { servletContext ->
+		JSONObject.NULL.metaClass.asBoolean = {-> false}
+		JSON.createNamedConfig("directoriesWithPath"){
+			it.registerObjectMarshaller(ILink) {
+				return it.child
+			}
+			it.registerObjectMarshaller(INode) {
+				return it.child
+			}
+		}
 
-    //initializing data
-    Role admin = null
-    if(Role.count() < 3){
-      new Role(authority: "ROLE_USER").save(failOnError: true)
-      new Role(authority: "ROLE_ADMIN").save(failOnError: true)
-      new Role(authority: "ROLE_FACEBOOK").save(failOnError: true)
-    }
+		//initializing data
+		Role admin = null
+		if(Role.count() < 3){
+			new Role(authority: "ROLE_USER").save(failOnError: true)
+			new Role(authority: "ROLE_ADMIN").save(failOnError: true)
+			new Role(authority: "ROLE_FACEBOOK").save(failOnError: true)
+		}
 
-    def userRole = Role.findByAuthority('ROLE_USER_2') ?: new Role(authority: 'ROLE_USER_2').save(failOnError: true)
-    def adminRole = Role.findByAuthority('ROLE_ADMIN_2') ?: new Role(authority: 'ROLE_ADMIN_2').save(failOnError: true)
+		def userRole = Role.findByAuthority('ROLE_USER_2') ?: new Role(authority: 'ROLE_USER_2').save(failOnError: true)
+		def adminRole = Role.findByAuthority('ROLE_ADMIN_2') ?: new Role(authority: 'ROLE_ADMIN_2').save(failOnError: true)
 
-    //add an admin and default user
-    if(Environment.current == Environment.DEVELOPMENT){
-      def adminUser = User.findByUsername('admin') ?: new User(
-          email: "admin@yahoo.fr",
-          username: 'admin',
-          password: 'admin',
-          enabled:true,
-          accountExpired:false,
-          accountLocked:false,
-          passwordExpired:false).save(failOnError: true)
+		//add an admin and default user
+		if(Environment.current == Environment.DEVELOPMENT){
+			def adminUser = User.findByUsername('admin') ?: new User(
+					email: "admin@yahoo.fr",
+					username: 'admin',
+					password: 'admin',
+					enabled:true,
+					accountExpired:false,
+					accountLocked:false,
+					passwordExpired:false).save(failOnError: true)
 
-      def basicUser = User.findByUsername('guest') ?: new User(
-          email: "user@yahoo.fr",
-          username: 'guest',
-          password: 'guest',
-          enabled:true,
-          accountExpired:false,
-          accountLocked:false,
-          passwordExpired:false).save(failOnError: true)
+			def basicUser = User.findByUsername('guest') ?: new User(
+					email: "user@yahoo.fr",
+					username: 'guest',
+					password: 'guest',
+					enabled:true,
+					accountExpired:false,
+					accountLocked:false,
+					passwordExpired:false).save(failOnError: true)
 
-      if (!adminUser.authorities.contains(adminRole)) {
-        UserRole.create adminUser, adminRole
-      }
-      if (!basicUser.authorities.contains(userRole)) {
-        UserRole.create basicUser, userRole
-      }
+			if (!adminUser.authorities.contains(adminRole)) {
+				UserRole.create adminUser, adminRole
+			}
+			if (!basicUser.authorities.contains(userRole)) {
+				UserRole.create basicUser, userRole
+			}
 
-      def test = User.findByUsername('testuser')?: new User( email: "test@yahoo.fr", username: "testuser", password:"testpass",
-      enabled:true, accountExpired:false, accountLocked:false, passwordExpired:false ).save(failOnError: true)
+			def test = User.findByUsername('testuser')?: new User( email: "test@yahoo.fr", username: "testuser", password:"testpass",
+			enabled:true, accountExpired:false, accountLocked:false, passwordExpired:false ).save(failOnError: true)
 
-    }
+			if(INode.count() == 0){
+				INode leaf = new INode(name: "dummyLeaf", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'file/text').save(failOnError: true, flush: true)
+				INode folder = new INode(name: "dummyFolder", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'inode/directory').save(failOnError: true, flush: true)
+				folder.addToChildren(leaf)
+				basicUser.addToINodes(folder)
+				basicUser.addToINodes(leaf)
+				basicUser.save(failOnError: true, flush: true)
+			}
+		}
 
-  }
-  def destroy = {
-  }
+	}
+	def destroy = {
+	}
 }
