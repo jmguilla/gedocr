@@ -22,6 +22,12 @@ class UserController {
 	def saltSource
 	def myOAuthService
 
+	@Secured(['IS_AUTHENTICATED_FULLY'])
+	def accounts(){
+		User user = springSecurityService.getCurrentUser()
+		def oAuthIDs = user.oAuthIDs // force loading 
+		render view: 'accounts', model: [user: user]
+	}
 	/**
 	 * Display view of user parameters
 	 * @return
@@ -51,16 +57,13 @@ class UserController {
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def getUser() {
 		def result = [:]
-		def user = null
 		if(springSecurityService.isLoggedIn()){
-			user = springSecurityService.getCurrentUser()
+			result.user = springSecurityService.getCurrentUser()
 		}
 		else{
-			user = "not logged";
+			result.user = "not logged";
 		}
-
-		result.user = user
-		JSON.use('getUser'){
+		JSON.use(params.serialize?:'getUser'){
 			render(result as JSON)
 		}
 	}

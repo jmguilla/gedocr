@@ -15,7 +15,7 @@
  */
 package com.kott.fr
 
-import com.kott.fr.User
+import grails.plugins.jsonapis.JsonApi
 
 /**
  * Simple domain class that records the identities of users authenticating via
@@ -24,9 +24,20 @@ import com.kott.fr.User
  * user account, although only long IDs are supported at the moment.
  */
 class OAuthID implements Serializable {
-
+	
+	@JsonApi(['withOAuthIDs'])
 	String provider
 	String accessToken
+	
+	static marshalling={
+		json{
+		  withOAuthIDs{
+			shouldOutputIdentifier false
+			shouldOutputVersion false
+			shouldOutputClass false
+		  }
+		}
+	  }
 
 	static belongsTo = [user: User]
 

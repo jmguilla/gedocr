@@ -37,11 +37,11 @@
 				<div id="paramsNav"
 						class="col-lg-2">
 					<ul class="nav nav-pills nav-stacked">
-					  <li class="${(controllerName == 'user' && actionName == 'show' ) ? 'active' : ''}"><g:link
-							controller="user" action="show">Resume</g:link>
+					  <li class="${(controllerName == 'user' && actionName == 'accounts' ) ? 'active' : ''}">
+					  <g:link controller="user" action="accounts">Accounts</g:link>
 					  </li>
-					  <li class="${(controllerName == 'user' && actionName == 'edit' ) ? 'active' : ''}"><g:link
-							controller="user" action="edit">Settings</g:link></li>
+					  <li class="${(controllerName == 'user' && actionName == 'edit' ) ? 'active' : ''}">
+					  <g:link controller="user" action="edit">Settings</g:link></li>
 					</ul>
 				</div>
 				<div class="col-lg-10" >

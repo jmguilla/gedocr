@@ -3,7 +3,7 @@ var services = angular.module("services", [ "ngResource" ]);
 services.factory('User', function($resource) {
 	return $resource('/user/:actionId/:userId.json', {
 		actionId : '',
-		userId : '@id'
+		userId : '@id',
 	}, {
 		getUser : {
 			method : 'GET',

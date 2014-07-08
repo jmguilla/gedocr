@@ -5,10 +5,10 @@ import grails.plugins.jsonapis.JsonApi
 class User {
 
 	transient springSecurityService
-
-	@JsonApi(['userUpdate', 'getUser'])
+	
+	@JsonApi(['userUpdate', 'getUser', 'withOAuthIDs'])
 	String email
-	@JsonApi(['userUpdate', 'getUser'])
+	@JsonApi(['userUpdate', 'getUser', 'withOAuthIDs'])
 	String username
 	String password
 	Date signin
@@ -16,6 +16,9 @@ class User {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	
+	@JsonApi(['withOAuthIDs'])
+	Set oAuthIDs
 	
 	static marshalling={
 		json{
@@ -25,6 +28,11 @@ class User {
 			shouldOutputClass false
 		  }
 		  getUser{
+			shouldOutputIdentifier false
+			shouldOutputVersion false
+			shouldOutputClass false
+		  }
+		  withOAuthIDs{
 			shouldOutputIdentifier false
 			shouldOutputVersion false
 			shouldOutputClass false

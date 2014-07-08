@@ -51,12 +51,16 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
 		$scope.getUser();
 		$scope.initAccountLinkView();
 	}
+	
+	$scope.initAccountsView = function(){
+		$scope.getUser({serialize: 'withOAuthIDs'});
+	}
 
 	/**
 	 * Get user and inject in scope
 	 */
-	$scope.getUser = function() {
-		User.getUser({}, function(data, headers) {
+	$scope.getUser = function(params) {
+		User.getUser(params, function(data, headers) {
 			$scope.user = data.user;
 		}, function(httpResponse) {
 			Alert.addAlert({
