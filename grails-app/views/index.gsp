@@ -22,6 +22,13 @@
 				</div>
 			</div>
 		</sec:ifNotLoggedIn>
+		<sec:ifLoggedIn>
+			<div class="jumbotron">
+			  <h1>Welcome!</h1>
+			  <p><a class="btn btn-primary btn-lg" role="button">Welcome!</a></p>
+			</div>
+		</sec:ifLoggedIn>
+		
 	</div>
 
 </body>
