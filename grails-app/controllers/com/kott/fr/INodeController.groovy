@@ -101,6 +101,17 @@ class INodeController {
 						render(view: 'uploadForm')
 						return
 					}
+					if(!params.selectedDirectory){
+						flash.type = 'alert'
+						flash.message = 'target directory not set'
+						render view: 'upload'
+					}
+					INode targetDirectory = INode.get(JSON.parse(params.selectedDirectory).id)
+					if(!targetDirectory){
+						flash.type = 'alert'
+						flash.message = 'No such target directory'
+						render view: 'upload'
+					}
 					InputStreamContent mediaContent = new InputStreamContent(f.getContentType(), new BufferedInputStream(f.getInputStream()))
 					mediaContent.setLength(f.getSize())
 					HttpTransport httpTransport = new NetHttpTransport()
@@ -111,7 +122,7 @@ class INodeController {
 					body.setTitle(f.getOriginalFilename())
 					body.setDescription("A test document")
 					body.setMimeType(f.getContentType())
-					body.setParents(Arrays.asList(new ParentReference().setId("0B5DEy30M04E2S2hocVFERExfVms")))
+					body.setParents(Arrays.asList(new ParentReference().setId(targetDirectory.filesystemID)))
 					Drive.Files.Insert driveRequest = drive.files().insert(body, mediaContent)
 					driveRequest.getMediaHttpUploader().setProgressListener(new CustomProgressListener())
 					driveRequest.execute()

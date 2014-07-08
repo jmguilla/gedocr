@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="/css/upload.css">
 	</head>
 	<body>
-		<form class="form-horizontal" role="form" enctype="multipart/form-data" action="${createLink(controller: 'document', action: 'upload')}" method="post" ng-controller="UploadCtrl" ng-init="init()">
+		<form class="form-horizontal" role="form" enctype="multipart/form-data" action="${createLink(controller: 'INode', action: 'upload')}" method="post" ng-controller="UploadCtrl" ng-init="init()">
 		  <div class="form-group">
 		    <label for="document" class="col-sm-2 control-label">Document</label>
 		    <div class="col-sm-9 input-group">
@@ -43,6 +43,7 @@
 		      <button type="submit" class="btn btn-default">Upload</button>
 		    </div>
 		  </div>
+		  <input type="hidden" name="selectedDirectory" value="{{selectedDirectory}}"/>
 		</form>
 	</body>
 </html>
