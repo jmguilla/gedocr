@@ -29,6 +29,7 @@ class GoogleDriveService {
 		driveRequest.setQ("trashed = false")
 		FileList directories = null
 		HashMap<String, Node> idToFile = new HashMap<String, Node>()
+		new Notification(user: owner, message: "Google drive synchronization has begun", controller: UserController.class.getSimpleName()).save(flush: true)
 		while((directories = driveRequest.execute())){
 			directories.getItems().each{
 				def iNode = new INode(owner: owner, name: it.getTitle(), mimeType: it.getMimeType(), filesystemID: it.getId()).save(failOnError: true)
@@ -59,5 +60,6 @@ class GoogleDriveService {
 		}
 		rootNodes.each{saveRecurse(it, saveRecurse)}
 		owner.save(failOnError: true, flush: true)
+		new Notification(user: owner, message: "Google drive synchronization completed", controller: UserController.class.getSimpleName()).save(flush: true)
 	}
 }
