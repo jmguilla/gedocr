@@ -32,6 +32,10 @@
 		<g:render template="/shared/nav" />
 		
 		<div class="container">
+			<div ng-repeat="notification in notifications" class="alert alert-info alert-dismissable slide" ng-cloak>
+				<button ng-click="alert('before'); notification.$delete(); alert('after'); notifications.splice($index, 1)" type="button" class="close" data-dismiss="notification" aria-hidden="true">&times;</button>
+				<span ng-bind="notification.creation"></span> - <span ng-bind="notification.message"></span>
+			</div>
 			
 			<div class="row">
 				<div id="paramsNav"

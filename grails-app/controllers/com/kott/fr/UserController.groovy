@@ -10,15 +10,6 @@ import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.Authentication
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.http.HttpTransport
-import com.google.api.client.http.javanet.NetHttpTransport
-import com.google.api.client.json.JsonFactory
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.drive.Drive
-import com.google.api.services.drive.model.About
-import com.google.api.services.drive.model.FileList
-
 
 class UserController {
 
@@ -30,6 +21,7 @@ class UserController {
 	def springSecurityService
 	def saltSource
 	def myOAuthService
+	def notificationService
 	def googleDriveService
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
@@ -89,7 +81,7 @@ class UserController {
 		}
 	}
 
-	@Transactional(readOnly = false)
+	@Transactional()
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def syncProvider(){
 		withFormat{
@@ -100,7 +92,9 @@ class UserController {
 					return
 				}
 				def owner = springSecurityService.getCurrentUser()
+				notificationService.create(user: owner, message: "Google drive synchronization has begun", controller: UserController.class.getSimpleName())
 				googleDriveService.importAll(owner)
+				notificationService.create(user: owner, message: "Google drive synchronization completed", controller: UserController.class.getSimpleName())
 				render([type: 'success', message: 'import success'] as JSON)
 			}
 		}

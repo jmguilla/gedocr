@@ -110,6 +110,13 @@ services.factory('Alert', function($rootScope, $timeout) {
 	};
 })
 
+services.factory('Notification', function($resource) {
+	return $resource('/notification/:actionId/:notificationId.json', {
+		actionId : '',
+		notificationId : '@id'
+	});
+})
+
 services.factory('WebSite', function($rootScope) {
 	var title = 'mywebsite';
 	return {
@@ -126,7 +133,7 @@ services.factory('WebSite', function($rootScope) {
 services.factory('INode', function($resource) {
 	return $resource('/INode/:actionId/:inodeId.json', {
 		actionId : '',
-		userId : '@id'
+		inodeId : '@id'
 	},{
 		directories: {
 			method: 'GET',

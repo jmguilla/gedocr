@@ -20,6 +20,7 @@ controllers.controller("MainCtrl",
 			// store alerts in a single place, the $rootScope, accessed by service
 			// Alert
 			$rootScope.alerts = [];
+			$rootScope.notifications = [];
 			$rootScope.alertTopDisplay = true;
 
 		});
@@ -30,9 +31,14 @@ controllers.controller("NavCtrl", function($scope, $window) {
 	}
 });
 
-controllers.controller("UserCtrl", function($scope, $modal, User, Alert) {
+controllers.controller("UserCtrl", function($scope, $modal, User, Alert, Notification) {
 
 	$scope.initUserView = function() {
+		Notification.query({actionId: 'query', c: 'UserController'},function(data, headers){
+			angular.forEach(data, function(notification, index){
+				this.push(notification);
+			}, $scope.notifications);
+		});
 		$scope.getUser();
 	}
 
