@@ -138,7 +138,7 @@ class UserController {
 					inode.save(failOnError: true, flush: true)
 					inode.children?.each{method(it, method)}
 				}
-//				rootNodes.each{saveRecurse(it, saveRecurse)}
+				rootNodes.each{saveRecurse(it, saveRecurse)}
 				owner.save(failOnError: true, flush: true)
 				render([type: 'success', message: 'import success'] as JSON)
 			}

@@ -1,9 +1,7 @@
-import grails.converters.JSON
 import grails.util.Environment
 
 import org.codehaus.groovy.grails.web.json.JSONObject
 
-import com.kott.fr.ILink
 import com.kott.fr.INode
 import com.kott.fr.Role
 import com.kott.fr.User
@@ -13,14 +11,6 @@ class BootStrap {
 
 	def init = { servletContext ->
 		JSONObject.NULL.metaClass.asBoolean = {-> false}
-		JSON.createNamedConfig("directoriesWithPath"){
-			it.registerObjectMarshaller(ILink) {
-				return it.child
-			}
-			it.registerObjectMarshaller(INode) {
-				return it.child
-			}
-		}
 
 		//initializing data
 		Role admin = null
@@ -67,6 +57,8 @@ class BootStrap {
 				INode leaf = new INode(name: "dummyLeaf", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'file/text').save(failOnError: true, flush: true)
 				INode folder = new INode(name: "dummyFolder", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'inode/directory').save(failOnError: true, flush: true)
 				folder.addToChildren(leaf)
+				leaf.addToParents(folder)
+				folder.save(failOnError: true, flush: true)
 				basicUser.addToINodes(folder)
 				basicUser.addToINodes(leaf)
 				basicUser.save(failOnError: true, flush: true)

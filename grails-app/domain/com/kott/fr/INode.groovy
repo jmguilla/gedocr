@@ -2,9 +2,12 @@ package com.kott.fr
 
 import grails.plugins.jsonapis.JsonApi
 
+
 class INode {
 	
 	private static final String pathSeparator = '/'
+	
+	String id
 	
 	@JsonApi(['directoriesWithPath'])
 	String name
@@ -16,19 +19,20 @@ class INode {
 
 	static hasMany = [
 		tags: Tag,
-		parents: ILink,
-		children: ILink
+		parents: INode,
+		children: INode
 	]
 	
-	static belongsTo = [
-		owner: User,
-		parents: Set
-		]
+	static belongsTo = [owner: User, parents: INode]
 	
-	static mappedBy = [
-		children: 'parent',
-		parents: 'child'	
-	]
+	static mappedBy = [children: 'parents',
+		parents: 'children']
+	
+	static mapping = {
+		id generator: 'uuid'
+		parents joinTable: [name: "PARENT_CHILD", key: 'parent_id', column: 'child_id']
+		children joinTable: [name: "CHILD_PARENT", key: 'child_id', column: 'parent_id']
+	}
 
 	@JsonApi(['directoriesWithPath'])
 	Set tags
@@ -61,17 +65,10 @@ class INode {
 	List<String> getPaths() {
 		def result = []
 		if(parents){
-			parents.each{result.addAll(it.parent.getPaths().collect{ it + pathSeparator + name})}
+			parents.each{result.addAll(it.getPaths().collect{ it + pathSeparator + name})}
 		}else{
 			result = [pathSeparator + name]
 		}
 		result
-	}
-	
-	void addToChildren(INode node){
-		if(children == null){
-			children = []
-		}
-		children.add(new ILink(parent: this, child: node));
 	}
 }
