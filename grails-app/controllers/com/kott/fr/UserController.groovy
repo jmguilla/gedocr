@@ -30,6 +30,7 @@ class UserController {
 	def springSecurityService
 	def saltSource
 	def myOAuthService
+	def googleDriveService
 
 	@Secured(['IS_AUTHENTICATED_FULLY'])
 	def accounts(){
@@ -99,47 +100,7 @@ class UserController {
 					return
 				}
 				def owner = springSecurityService.getCurrentUser()
-				def rootNodes = []
-				HttpTransport httpTransport = new NetHttpTransport()
-				JsonFactory jsonFactory = new JacksonFactory()
-				GoogleCredential credential = new GoogleCredential().setAccessToken(springSecurityService.currentUser.oAuthIDs[0].accessToken)
-				Drive drive =  new Drive.Builder(httpTransport, jsonFactory, credential).build()
-				About about = drive.about().get().execute();
-				String rootFolderId = about.getRootFolderId()
-				Drive.Files.List driveRequest = drive.files().list()
-				driveRequest.setQ("mimeType = 'application/vnd.google-apps.folder' and trashed = false and (title contains 'Coursera' or '0B5DEy30M04E2d2RCSVZocUd4cnc' in parents)")
-				FileList directories = null
-				HashMap<String, Node> idToFile = new HashMap<String, Node>()
-				while((directories = driveRequest.execute())){
-					directories.getItems().each{
-						def iNode = new INode(owner: owner, name: it.getTitle(), mimeType: "inode/directory", filesystemID: it.getId()).save(failOnError: true)
-						owner.addToINodes(iNode)
-						idToFile.put(it.getId(), new Node(null, [node: it, inode: iNode]))
-					}
-					if(!(driveRequest.setPageToken(directories.getNextPageToken()) && driveRequest.getPageToken() != null && driveRequest.getPageToken().length() > 0)){
-						break;
-					}
-				}
-				idToFile.keySet().each{key ->
-					Node file = idToFile.get(key)
-					if(file.name()["node"].getParents()){
-						Node parent = idToFile.get(file.name()["node"].getParents()[0].getId())
-						if(parent){
-							file.setParent(parent)
-							parent.name()["inode"].addToChildren(file.name()["inode"])
-							parent.append(file)
-						}
-						if(rootFolderId.equals(file.name()["node"].getParents()[0].getId())){
-							rootNodes << file.name()["inode"]
-						}
-					}
-				}
-				def saveRecurse = { INode inode, method ->
-					inode.save(failOnError: true, flush: true)
-					inode.children?.each{method(it, method)}
-				}
-				rootNodes.each{saveRecurse(it, saveRecurse)}
-				owner.save(failOnError: true, flush: true)
+				googleDriveService.importAll(owner)
 				render([type: 'success', message: 'import success'] as JSON)
 			}
 		}
