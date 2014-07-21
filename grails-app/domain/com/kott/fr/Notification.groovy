@@ -35,7 +35,7 @@ class Notification {
 		}
 	  }
 
-	def beforeInsert(){
+	def beforeValidate() {
 		if(!creation){
 			creation = new Date()
 		}

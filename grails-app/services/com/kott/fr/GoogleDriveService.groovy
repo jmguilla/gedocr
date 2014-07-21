@@ -13,11 +13,14 @@ import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.About
 import com.google.api.services.drive.model.FileList
 
-@Transactional
+@Transactional()
 class GoogleDriveService {
+	
+	def springSecurityService
 
 	@Transactional(propagation = Propagation.REQUIRES_NEW, timeout = 3600)
-	def importAll(User owner) {
+	def importAll() {
+		User owner = springSecurityService.getCurrentUser()
 		def rootNodes = []
 		HttpTransport httpTransport = new NetHttpTransport()
 		JsonFactory jsonFactory = new JacksonFactory()
@@ -57,7 +60,13 @@ class GoogleDriveService {
 			inode.save(failOnError: true, flush: true)
 			inode.children?.each{method(it, method)}
 		}
-		rootNodes.each{saveRecurse(it, saveRecurse)}
+//		rootNodes.each{saveRecurse(it, saveRecurse)}
 		owner.save(failOnError: true, flush: true)
+	}
+	
+	@Transactional(readOnly = true)
+	def createDestinationFolder(){
+		User owner = springSecurityService.getCurrentUser()
+		String destinationFolder = owner.config.destinationFolder
 	}
 }

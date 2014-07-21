@@ -91,10 +91,9 @@ class UserController {
 					render([type: 'alert', message: message(code: 'user.provider.sync.missingparam', default: 'No provider in the request')] as JSON)
 					return
 				}
-				def owner = springSecurityService.getCurrentUser()
-				notificationService.create(user: owner, message: "Google drive synchronization has begun", controller: UserController.class.getSimpleName())
-				googleDriveService.importAll(owner)
-				notificationService.create(user: owner, message: "Google drive synchronization completed", controller: UserController.class.getSimpleName())
+				notificationService.create(message: "Google drive synchronization has begun", controller: UserController.class.getSimpleName())
+				googleDriveService.importAll()
+				notificationService.create(message: "Google drive synchronization completed", controller: UserController.class.getSimpleName())
 				render([type: 'success', message: 'import success'] as JSON)
 			}
 		}

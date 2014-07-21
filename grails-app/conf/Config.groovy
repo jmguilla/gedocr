@@ -166,7 +166,7 @@ grails.plugin.springsecurity.controllerAnnotations.staticRules = [
   '/INode/upload/*':                ['IS_AUTHENTICATED_FULLY'],
   '/user/show':                		['IS_AUTHENTICATED_FULLY'],
   '/user/edit':                		['IS_AUTHENTICATED_FULLY'],
-  '/user/syncProvider':        		['IS_AUTHENTICATED_FULLY'],
+//  '/user/syncProvider':        		['IS_AUTHENTICATED_FULLY'],
   '/user/getUser':	        		['IS_AUTHENTICATED_FULLY'],
   '/user/accounts':	        		['IS_AUTHENTICATED_FULLY'],
   '/user/update':	        		['IS_AUTHENTICATED_FULLY'],

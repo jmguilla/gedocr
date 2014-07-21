@@ -4,6 +4,7 @@ import org.codehaus.groovy.grails.web.json.JSONObject
 
 import com.kott.fr.INode
 import com.kott.fr.Role
+import com.kott.fr.Tag
 import com.kott.fr.User
 import com.kott.fr.UserRole
 
@@ -53,19 +54,34 @@ class BootStrap {
 			def test = User.findByUsername('testuser')?: new User( email: "test@yahoo.fr", username: "testuser", password:"testpass",
 			enabled:true, accountExpired:false, accountLocked:false, passwordExpired:false ).save(failOnError: true)
 
-			if(INode.count() == 0){
-				INode leaf = new INode(name: "dummyLeaf", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'file/text').save(failOnError: true, flush: true)
-				INode folder = new INode(name: "dummyFolder", owner: basicUser, filesystemID: 'dummyfsID', mimeType: 'inode/directory').save(failOnError: true, flush: true)
-				folder.addToChildren(leaf)
-				leaf.addToParents(folder)
-				folder.save(failOnError: true, flush: true)
-				basicUser.addToINodes(folder)
-				basicUser.addToINodes(leaf)
-				basicUser.save(failOnError: true, flush: true)
+			Tag smartFolderTag = Tag.find("from Tag as t where t.value = 'SmartFolder-0.1'")
+			if(!smartFolderTag){
+				smartFolderTag = new Tag(value: "SmartFolder-0.1").save(flush: true, failOnError: true)
 			}
-		}
 
-	}
-	def destroy = {
+			if(!INode.findAll("from INode as i where owner is null and :tag in elements(i.tags)", [tag: smartFolderTag])){
+				def directories = ['a', 'b', 'c', 'd']
+				for(i in directories){
+					INode dir1 = new INode(name: i, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
+					for(j in directories){
+						INode dir2 = new INode(name: j, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
+						dir2.addToParents(dir1)
+						dir1.addToChildren(dir2)
+						dir1.save(failOnError: true, flush: true)
+						dir2.save(failOnError: true, flush: true)
+						for(k in directories){
+							INode dir3 = new INode(name: k, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
+							dir3.addToParents(dir2)
+							dir2.addToChildren(dir3)
+							dir2.save(failOnError: true, flush: true)
+							dir3.save(failOnError: true, flush: true)
+						}
+					}
+				}
+			}
+
+		}
+		def destroy = {
+		}
 	}
 }

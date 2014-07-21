@@ -2,6 +2,8 @@ package com.kott.fr
 
 import grails.plugins.jsonapis.JsonApi
 
+import java.util.Date
+
 class User {
 
 	transient springSecurityService
@@ -16,6 +18,7 @@ class User {
 	boolean accountExpired
 	boolean accountLocked
 	boolean passwordExpired
+	Config configuration
 	
 	@JsonApi(['withOAuthIDs'])
 	Set oAuthIDs
@@ -73,6 +76,11 @@ class User {
 	def beforeValidate() {
 		if(!signin){
 			signin = new Date()
+		}
+		if(!configuration){
+			configuration = new Config()
+			configuration.setUser(this)
+			configuration = configuration.save()
 		}
 	}
 

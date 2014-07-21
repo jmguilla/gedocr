@@ -28,10 +28,15 @@ class INodeController {
 	public directories(){
 		withFormat{
 			json{
+				def tag = Tag.findByValue("SmartFolder-0.1")
 				def rootNodes = INode.withCriteria {
 					and{
 						isEmpty("parents")
-						eq("owner", springSecurityService.getCurrentUser())
+						isNull("owner")
+						tags{
+							idEq(tag.id)
+						}
+						eq("mimeType", 'inode/directory')
 					} 
 				}
 					

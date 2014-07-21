@@ -43,6 +43,7 @@ class INode {
 	Set parents
 
 	static constraints = {
+		owner nullable: true
 		name nullable: false, blank: false
 		mimeType nullable: false, blank: false, default: "UNKNOWN"
 		parents nullable: true
