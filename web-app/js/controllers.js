@@ -129,6 +129,7 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert, Notific
 
 controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
+		$scope.isTargetDir = false;
 		$scope.selectedDirectory = undefined;
 		$scope.selectedDirectories = [];
 		$scope.selectSize = 5;
@@ -158,6 +159,15 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 		if($scope.selectedDirectory != undefined && $scope.selectedDirectory.children != undefined){
 			$scope.directoriesForSelection = $scope.selectedDirectory.children;
 			$scope.selectedDirectories.push($scope.selectedDirectory);
+			if($scope.selectedDirectory.tags != undefined){
+				for(var i = 0; i < $scope.selectedDirectory.tags.length; i++){
+					if($scope.selectedDirectory.tags[i] == 'Destination'){
+						$scope.isTargetDir = true;
+					}
+				}
+			}
+		}else{
+			$scope.isTargetDir = false;
 		}
 	}
 });
