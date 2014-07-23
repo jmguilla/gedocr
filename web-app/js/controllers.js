@@ -130,35 +130,34 @@ controllers.controller("UserCtrl", function($scope, $modal, User, Alert, Notific
 controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	$scope.init = function() {
 		$scope.selectedDirectory = undefined;
-		$scope.displaySelectDirectory = true;
-		$scope.askToCreateDir = true;
-		$scope.filter = "";
+		$scope.selectedDirectories = [];
 		$scope.selectSize = 5;
 		$scope.directories = undefined;
-		$scope.$watch('filter', function(newValue, oldValue) {
-			if(newValue == '' && !angular.isUndefined(oldValue) && oldValue != ''){
-				$scope.selectSize = $scope.directories.length;
-			}else{
-				if(oldValue == '' && !angular.isUndefined(newValue) && newValue != ''){
-					$scope.selectSize = 5;
-				}
-			}
-    });
 		INode.directories(function(data, header){
-			var flattenDirectories = function(directories, outParam){
-				angular.forEach(directories, function(value){
-					this.push(value);
-					if(value.children !== undefined && value.children.length > 0){
-						flattenDirectories(value.children, outParam)
-					}
-					value.children = [];
-				}, outParam); 
-			};
-			$scope.directories = [];
-			flattenDirectories(data.result, $scope.directories);
-			$scope.selectSize = $scope.directories.length;
+			$scope.directories = data.result;
+			$scope.directoriesForSelection = data.result;
 		},function(httpResponse){
 			$scope.command.errors = Alert.populateErrors(httpResponse.data.command.errors);
 		});
+	}
+	
+	$scope.directorySelectedChanged = function(index){
+		if(index != undefined){
+			if(index == -1){
+				// rollback to root
+				$scope.selectedDirectories =[];
+				$scope.selectedDirectory = undefined;
+				$scope.directoriesForSelection = $scope.directories;
+			}else{
+				// rollback to a parent directory
+				$scope.selectedDirectory = $scope.selectedDirectories[index];
+				$scope.selectedDirectories.splice(index, $scope.selectedDirectories.length - index);
+			}
+		}
+		// selected among the different options
+		if($scope.selectedDirectory != undefined && $scope.selectedDirectory.children != undefined){
+			$scope.directoriesForSelection = $scope.selectedDirectory.children;
+			$scope.selectedDirectories.push($scope.selectedDirectory);
+		}
 	}
 });

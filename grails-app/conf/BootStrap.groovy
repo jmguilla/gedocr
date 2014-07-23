@@ -55,8 +55,12 @@ class BootStrap {
 			enabled:true, accountExpired:false, accountLocked:false, passwordExpired:false ).save(failOnError: true)
 
 			Tag smartFolderTag = Tag.find("from Tag as t where t.value = 'SmartFolder-0.1'")
+			Tag destFolderTag = Tag.find("from Tag as t where t.value = 'Destination'")
 			if(!smartFolderTag){
 				smartFolderTag = new Tag(value: "SmartFolder-0.1").save(flush: true, failOnError: true)
+			}
+			if(!destFolderTag){
+				destFolderTag = new Tag(value: "Destination").save(flush: true, failOnError: true)
 			}
 
 			if(!INode.findAll("from INode as i where owner is null and :tag in elements(i.tags)", [tag: smartFolderTag])){
@@ -64,13 +68,13 @@ class BootStrap {
 				for(i in directories){
 					INode dir1 = new INode(name: i, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
 					for(j in directories){
-						INode dir2 = new INode(name: j, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
+						INode dir2 = new INode(name: i + j, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
 						dir2.addToParents(dir1)
 						dir1.addToChildren(dir2)
 						dir1.save(failOnError: true, flush: true)
 						dir2.save(failOnError: true, flush: true)
 						for(k in directories){
-							INode dir3 = new INode(name: k, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
+							INode dir3 = new INode(name: i + j + k, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag, destFolderTag]).save(failOnError: true, flush: true)
 							dir3.addToParents(dir2)
 							dir2.addToChildren(dir3)
 							dir2.save(failOnError: true, flush: true)

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+*<!DOCTYPE html>
 <html>
 	<head>
 		<meta name='layout' content='main' />
@@ -14,28 +14,14 @@
 		    </div>
 		  </div>
 		  <div class="form-group">
-		    <label for="search" class="col-sm-2 control-label">Filter</label>
-		    <div class="col-sm-9 input-group">
-		      <input name="search" type="search" class="form-control" id="search" placeholder="search for a target folder" ng-model="filter" ng-focus="displaySelectDirectory=true; selectedDirectory = undefined;"/>
-		    </div>
-		  </div>
-		  <div class="form-group" ng-if="displaySelectDirectory">
-		    <label for="search-result" class="col-sm-2 control-label">Target Folder</label>
-		    <div class="col-sm-9 input-group">
-		      	<select class="form-control" size="5" id="search-result" ng-model="$parent.selectedDirectory" ng-options="directory.paths[0] for directory in directories|fileFilter:filter|limitTo:selectSize" ng-change="$parent.displaySelectDirectory=!$parent.displaySelectDirectory; $parent.filter = ''">
-		      		<option class="list-group-item" value="" ng-if="$parent.directories == undefined">-- loading --</option>
-				</select>
-		    </div>
-		  </div>
-		  <div class="form-group" ng-if="selectedDirectory != undefined">
 		    <label for="search-result" class="col-sm-2 control-label">Target Folder</label>
 		    <div class="input-group col-sm-9">
-		    	<span ng-if="askToCreateDir == false" class="input-group-btn">
-                    <button class="btn btn-primary"><i>create!</i></button>
-                </span>
-		    	<span class="input-group-addon">{{selectedDirectory.paths[0] + "/"}}</span>
-		    	<span class="form-control" ng-if="askToCreateDir == true"><a href="#" ng-click="$parent.askToCreateDir = false">+ new directory</a></span>
-		    	<input ng-if="askToCreateDir == false" type="text" class="form-control" />
+		    	<span class="input-group-addon">
+		    	<a href="#" ng-click="directorySelectedChanged(-1)">&nbsp;&nbsp;/</a>
+		    	<a href="#" ng-repeat="directory in selectedDirectories" ng-click="directorySelectedChanged($index)">{{directory.name + "/"}}</a></span>
+		      	<select class="form-control" size="5" id="search-result" ng-model="selectedDirectory" ng-options="directory.name for directory in directoriesForSelection|orderBy:'name'" ng-change="directorySelectedChanged()">
+		      		<option class="list-group-item" value="" ng-if="directories == undefined">-- loading --</option>
+				</select>
 		    </div>
 		  </div>
 		  <div class="form-group">
