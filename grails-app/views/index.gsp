@@ -15,8 +15,7 @@
 				<div class="well text-center">
 					<div class="row">
 						<div class="col-lg-2 vCenterRow">
-							<g:link class="btn btn-success lead" controller="user"
-								action="create">Register</g:link>
+							<g:link class="btn btn-success lead" controller="login" action="auth">Login</g:link>
 						</div>
 					</div>
 				</div>

@@ -25,8 +25,6 @@
 				<sec:ifNotLoggedIn roles="ROLE_USER">
 					<li class="${(controllerName == 'login' ) ? 'active' : ''}"><g:link
 							controller="login" action="auth">Login</g:link></li>
-					<li class="${(controllerName == 'user' ) ? 'active' : ''}"><g:link
-							controller="user" action="create"> Register</g:link></li>
 				</sec:ifNotLoggedIn>
 
 				<sec:ifLoggedIn roles="ROLE_USER">

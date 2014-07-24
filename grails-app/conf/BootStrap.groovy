@@ -29,7 +29,6 @@ class BootStrap {
 			def adminUser = User.findByUsername('admin') ?: new User(
 					email: "admin@yahoo.fr",
 					username: 'admin',
-					password: 'admin',
 					enabled:true,
 					accountExpired:false,
 					accountLocked:false,
@@ -38,7 +37,6 @@ class BootStrap {
 			def basicUser = User.findByUsername('guest') ?: new User(
 					email: "user@yahoo.fr",
 					username: 'guest',
-					password: 'guest',
 					enabled:true,
 					accountExpired:false,
 					accountLocked:false,

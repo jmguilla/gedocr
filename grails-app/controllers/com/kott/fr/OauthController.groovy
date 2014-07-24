@@ -36,6 +36,7 @@ class OauthController {
 
 	def grailsApplication
 	def oauthService
+	def userService
 	def springSecurityService
 	def myOAuthService
 
@@ -66,20 +67,18 @@ class OauthController {
 		// Create the relevant authentication token and attempt to log in.
 		OAuthToken oAuthToken = createAuthToken(params.provider, session[sessionKey])
 
-		if (oAuthToken.principal instanceof GrailsUser) {
-			authenticateAndRedirect(oAuthToken, defaultTargetUrl)
-		} else {
+		if (!(oAuthToken.principal instanceof GrailsUser)) {
 			// This OAuth account hasn't been registered against an internal
 			// account yet. Give the oAuthID the opportunity to create a new
 			// internal account or link to an existing one.
-			session[SPRING_SECURITY_OAUTH_TOKEN] = oAuthToken
+			User newUser = userService.create([email: oAuthToken.principal, username: oAuthToken.principal])
+			newUser.enabled = true
+			newUser.addToOAuthIDs(provider: oAuthToken.providerName, accessToken: oAuthToken.accessToken.token, user: newUser)
+			oAuthToken = myOAuthService.updateOAuthToken(oAuthToken, newUser)
+			myOAuthService.authenticate(session, oAuthToken)
 
-			def redirectUrl = SpringSecurityUtils.securityConfig.oauth.registration.askToLinkOrCreateAccountUri
-			assert redirectUrl, "grails.plugin.springsecurity.oauth.registration.askToLinkOrCreateAccountUri" +
-			" configuration option must be set!"
-			log.debug "Redirecting to askToLinkOrCreateAccountUri: ${redirectUrl}"
-			redirect(redirectUrl instanceof Map ? redirectUrl : [uri: redirectUrl])
 		}
+		authenticateAndRedirect(oAuthToken, defaultTargetUrl)
 	}
 
 	@PermitAll
@@ -87,8 +86,7 @@ class OauthController {
 		authenticateAndRedirect(null, defaultTargetUrl)
 	}
 
-	@PermitAll
-	def askToLinkOrCreateAccount() {
+	def private askToLinkOrCreateAccount() {
 		if (springSecurityService.loggedIn) {
 			def currentUser = springSecurityService.currentUser
 			OAuthToken oAuthToken = session[SPRING_SECURITY_OAUTH_TOKEN]
@@ -133,7 +131,7 @@ class OauthController {
 			return [uri: (config.successHandler.defaultTargetUrl ?: defaultUrlOnNull)]
 		}
 	}
-	
+
 	protected void authenticate(OAuthToken oAuthToken) {
 		session.removeAttribute SPRING_SECURITY_OAUTH_TOKEN
 		SecurityContextHolder.context.authentication = oAuthToken

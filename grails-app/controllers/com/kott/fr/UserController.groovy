@@ -99,13 +99,11 @@ class UserController {
 		}
 	}
 
-	@Transactional
-	@Secured(['permitAll'])
 	/**
 	 * Associates an OAuthID with an existing account. Needs the user's password to ensure
 	 * that the user owns that account, and authenticates to verify before linking.
 	 */
-	def linkAccount(OAuthLinkAccountCommand command){
+	def private linkAccount(OAuthLinkAccountCommand command){
 		withFormat{
 			html{
 				redirect controller: 'OauthController', action: 'askToLinkOrCreateAccount()'
@@ -160,9 +158,7 @@ class UserController {
 		response.status = 406
 	}
 
-	@Transactional
-	@Secured(['permitAll'])
-	def create(UserRegistrationCommand command){
+	def private create(UserRegistrationCommand command){
 		withFormat{
 			html{
 				//will render create.gsp
@@ -226,31 +222,6 @@ class UserController {
 		JSON.use('userUpdate'){
 			render ( [type: 'success', message: message(code: 'user.update.success', default: 'Update performed successfully'), user: me] as JSON)
 		}
-	}
-
-	/**
-	 * To update a user's password.
-	 * curl -X POST -d "{'current': 'currentPWD', 'newPWD': 'monNewPwd', 'newPWDAgain': 'monNewPwd'}" -> since authentication is required, doesn't work with curl...
-	 *
-	 * @return
-	 */
-	@Secured(['IS_AUTHENTICATED_FULLY'])
-	@Transactional
-	def updatePWD(UpdatePWDCommand command){
-		if(!command.validate()){
-			response.status = 406
-			JSON.use('userUpdate'){
-				command.springSecurityService = null
-				command.saltSource = null
-				render([type: 'danger', message: message(code: 'user.pwd.update.failure', default: 'Cannot update your password'), command: command] as JSON)
-			}
-			return
-		}
-
-		def user = springSecurityService.getCurrentUser()
-		user.password = command.newPassword
-		user.save(failOnError: true)
-		render([type: 'success', message: message(code: 'user.pwd.update.success')] as JSON)
 	}
 }
 

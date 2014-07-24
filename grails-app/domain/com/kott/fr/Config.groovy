@@ -4,6 +4,8 @@ class Config {
 	
 	String destinationFolder
 	
+	User user
+	
 	static belongsTo = [user: User]
 
     static constraints = {

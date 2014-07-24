@@ -2,8 +2,6 @@ package com.kott.fr
 
 import grails.plugins.jsonapis.JsonApi
 
-import java.util.Date
-
 class User {
 
 	transient springSecurityService
@@ -12,7 +10,7 @@ class User {
 	String email
 	@JsonApi(['userUpdate', 'getUser', 'withOAuthIDs'])
 	String username
-	String password
+	String password = "pwd"
 	Date signin
 	boolean enabled
 	boolean accountExpired
@@ -53,24 +51,12 @@ class User {
 	static constraints = {
 		email nullable: false, blank: false, unique: true, email: true
 		username nullable: false, blank: false
-		password nullable: false, blank: false
+		password nullable: true
 		signin nullable: false, blank: false
 	}
 
-	static mapping = { password column: '`password`' }
-
 	Set<Role> getAuthorities() {
 		UserRole.findAllByUser(this).collect { it.role } as Set
-	}
-
-	def beforeInsert() {
-		encodePassword()
-	}
-
-	def beforeUpdate() {
-		if (isDirty('password')) {
-			encodePassword()
-		}
 	}
 
 	def beforeValidate() {
@@ -79,12 +65,8 @@ class User {
 		}
 		if(!configuration){
 			configuration = new Config()
-			configuration.setUser(this)
+			configuration.user = this
 			configuration = configuration.save()
 		}
-	}
-
-	protected void encodePassword() {
-		password = springSecurityService.encodePassword(password)
 	}
 }
