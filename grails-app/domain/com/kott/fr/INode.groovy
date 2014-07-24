@@ -16,22 +16,23 @@ class INode {
 	
 	@JsonApi(['directoriesWithPath'])
 	String mimeType
+	
+	INode parent
+	
+	User owner
 
 	static hasMany = [
 		tags: Tag,
-		parents: INode,
 		children: INode
 	]
 	
-	static belongsTo = [owner: User, parents: INode]
+	static belongsTo = [owner: User, parent: INode]
 	
-	static mappedBy = [children: 'parents',
+	static mappedBy = [children: 'parent',
 		parents: 'children']
 	
 	static mapping = {
 		id generator: 'uuid'
-		parents joinTable: [name: "PARENT_CHILD", key: 'parent_id', column: 'child_id']
-		children joinTable: [name: "CHILD_PARENT", key: 'child_id', column: 'parent_id']
 	}
 
 	@JsonApi(['directoriesWithPath'])
@@ -40,17 +41,15 @@ class INode {
 	@JsonApi(['directoriesWithPath'])
 	Set children
 	
-	Set parents
-
 	static constraints = {
 		owner nullable: true
 		name nullable: false, blank: false
 		mimeType nullable: false, blank: false, default: "UNKNOWN"
-		parents nullable: true
+		parent nullable: true
 		children nullable: true
 		}
 	
-	static transients = ['paths']
+	static transients = ['path']
 	
 	static marshalling={
 		json{
@@ -63,12 +62,12 @@ class INode {
 	  }
 	
 	@JsonApi(['directoriesWithPath'])
-	List<String> getPaths() {
-		def result = []
-		if(parents){
-			parents.each{result.addAll(it.getPaths().collect{ it + pathSeparator + name})}
+	String getPath() {
+		def result = null
+		if(parent){
+			result = parent.getPath() + pathSeparator + name
 		}else{
-			result = [pathSeparator + name]
+			result = pathSeparator + name
 		}
 		result
 	}

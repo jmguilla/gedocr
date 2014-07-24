@@ -69,13 +69,13 @@ class BootStrap {
 					INode dir1 = new INode(name: i, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
 					for(j in directories){
 						INode dir2 = new INode(name: i + j, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag]).save(failOnError: true, flush: true)
-						dir2.addToParents(dir1)
+						dir2.parent = dir1
 						dir1.addToChildren(dir2)
 						dir1.save(failOnError: true, flush: true)
 						dir2.save(failOnError: true, flush: true)
 						for(k in directories){
 							INode dir3 = new INode(name: i + j + k, filesystemID: 'dummyfsID', mimeType: 'inode/directory', tags: [smartFolderTag, destFolderTag]).save(failOnError: true, flush: true)
-							dir3.addToParents(dir2)
+							dir3.parent = dir2
 							dir2.addToChildren(dir3)
 							dir2.save(failOnError: true, flush: true)
 							dir3.save(failOnError: true, flush: true)

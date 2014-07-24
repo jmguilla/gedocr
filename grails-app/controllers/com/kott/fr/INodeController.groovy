@@ -33,7 +33,7 @@ class INodeController {
 				def tag = Tag.findByValue("SmartFolder-0.1")
 				def rootNodes = INode.withCriteria {
 					and{
-						isEmpty("parents")
+						isNull("parent")
 						isNull("owner")
 						tags{ idEq(tag.id) }
 						eq("mimeType", 'inode/directory')
@@ -84,7 +84,7 @@ class INodeController {
 					def reverseParents = []
 					while(tmp){
 						reverseParents << tmp
-						tmp = tmp.parents[0]
+						tmp = tmp.parent
 					}
 					INode parent = retrieveOrCreateDirectory(null, springSecurityService.currentUser.configuration.destinationFolder);
 					reverseParents = reverseParents.reverse()
@@ -115,12 +115,15 @@ class INodeController {
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	def private INode retrieveOrCreateDirectory(INode parent, String name){
+		if(parent && !parent.isAttached()){
+			parent.attach()
+		}
 		INode iNode = null
 		if(!parent){
-			iNode = INode.find("from INode as inode where inode.parents is empty and inode.owner=:owner and inode.name=:name",
+			iNode = INode.find("from INode as inode where inode.parent is null and inode.owner=:owner and inode.name=:name",
 					[owner: springSecurityService.currentUser, name: name])
 		}else{
-			iNode = INode.find("from INode as inode where :parent in elements(inode.parents) and inode.owner=:owner and inode.name=:name",
+			iNode = INode.find("from INode as inode where inode.parent=:parent and inode.owner=:owner and inode.name=:name",
 					[parent: parent, owner: springSecurityService.currentUser, name: name])
 		}
 		if(!iNode){
@@ -148,16 +151,12 @@ class INodeController {
 		}
 		com.google.api.services.drive.model.File body = new com.google.api.services.drive.model.File()
 		body.setTitle(name)
-		body.setDescription("A Directory")
+		body.setDescription("directory")
 		body.setMimeType("application/vnd.google-apps.folder")
 		body.setParents(Arrays.asList(new ParentReference().setId(parentId)))
 		Drive.Files.Insert driveRequest = drive.files().insert(body)
 		com.google.api.services.drive.model.File result = driveRequest.execute()
-		def parents = []
-		if(parent){
-			parents << parent
-		}
-		new INode(owner: springSecurityService.currentUser, name: name, filesystemID: result.getId(), mimeType: 'inode/directory', parents: parents)
+		new INode(owner: springSecurityService.currentUser, name: name, filesystemID: result.getId(), mimeType: 'inode/directory', parent: parent)
 	}
 }
 
