@@ -29,7 +29,7 @@ class INode {
 	static belongsTo = [owner: User, parent: INode]
 	
 	static mappedBy = [children: 'parent',
-		parents: 'children']
+		parent: 'children']
 	
 	static mapping = {
 		id generator: 'uuid'

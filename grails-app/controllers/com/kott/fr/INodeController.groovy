@@ -99,7 +99,8 @@ class INodeController {
 					mediaContent.setLength(f.getSize())
 					body.setParents(Arrays.asList(new ParentReference().setId(parent.filesystemID)))
 					Drive.Files.Insert driveRequest = drive.files().insert(body, mediaContent)
-					driveRequest.execute()
+					com.google.api.services.drive.model.File result = driveRequest.execute()
+					new INode(filesystemID: result.getId(), parent: parent, name: f.getOriginalFilename(), mimeType: f.getContentType(), owner: springSecurityService.currentUser).save(failOnError: true, flush: true)
 					flash.type = 'success'
 					flash.message = 'upload successful'
 				}
