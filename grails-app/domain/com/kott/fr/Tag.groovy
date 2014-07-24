@@ -1,13 +1,26 @@
 package com.kott.fr
 
-class Tag {
+import grails.plugins.jsonapis.JsonApi
 
-	String value
+class Tag {
 	
+	@JsonApi(['directoriesWithPath'])
+	String value
+
 	boolean publique = false
 
-    static constraints = {
+	static constraints = {
 		value nullable: false, unique: true, size: 1..255
 		publique nullable: false
-    }
+	}
+
+	static marshalling={
+		json{
+			directoriesWithPath{
+				shouldOutputIdentifier false
+				shouldOutputVersion false
+				shouldOutputClass false
+			}
+		}
+	}
 }

@@ -144,6 +144,7 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 	
 	$scope.directorySelectedChanged = function(index){
 		if(index != undefined){
+			$scope.isTargetDir = false
 			if(index == -1){
 				// rollback to root
 				$scope.selectedDirectories =[];
@@ -161,7 +162,7 @@ controllers.controller("UploadCtrl", function($scope, INode, Alert) {
 			$scope.selectedDirectories.push($scope.selectedDirectory);
 			if($scope.selectedDirectory.tags != undefined){
 				for(var i = 0; i < $scope.selectedDirectory.tags.length; i++){
-					if($scope.selectedDirectory.tags[i] == 'Destination'){
+					if($scope.selectedDirectory.tags[i].value == 'Destination'){
 						$scope.isTargetDir = true;
 					}
 				}
